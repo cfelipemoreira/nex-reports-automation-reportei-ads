@@ -38,28 +38,13 @@ reportei = reportei_module.ReporteiClient()
 
 # ── Cached dashboard ID ─────────────────────────────────────────────────────
 
-_dashboard_id: str | None = None
-
-
-def _get_dashboard_id() -> str:
-    global _dashboard_id
-    if _dashboard_id is None:
-        _dashboard_id = reportei.get_dashboard_id(config.REPORTEI_DASHBOARD_NAME)
-        if not _dashboard_id:
-            raise RuntimeError(
-                f"Dashboard '{config.REPORTEI_DASHBOARD_NAME}' nao encontrado no Reportei."
-            )
-    return _dashboard_id
-
-
 # ── Job: Reportei daily ─────────────────────────────────────────────────────
 
 def job_reportei_daily(run_date: date | None = None):
     today = run_date or date.today()
     log.info("[reportei-daily] Iniciando analise para %s", today)
     try:
-        dash_id = _get_dashboard_id()
-        raw = reportei.fetch_daily_data(dash_id, today)
+        raw = reportei.fetch_daily_data(today)
         analysis = analyzer.analyze_reportei_daily(raw, today)
 
         path = pdf_path("reportei_daily", today.strftime("%Y-%m-%d"))
@@ -80,8 +65,7 @@ def job_reportei_monthly(run_date: date | None = None):
     today = run_date or date.today()
     log.info("[reportei-monthly] Iniciando relatorio mensal para %s", today)
     try:
-        dash_id = _get_dashboard_id()
-        raw = reportei.fetch_monthly_period_data(dash_id, today)
+        raw = reportei.fetch_monthly_period_data(today)
         analysis = analyzer.analyze_reportei_monthly(raw)
 
         path = pdf_path("reportei_monthly", today.strftime("%Y-%m-%d"))

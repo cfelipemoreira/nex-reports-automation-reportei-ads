@@ -186,138 +186,195 @@ def _generate_google_ads_insights(result: AnalysisResult, cur: dict, prev: dict)
 
 # ── Reportei analysis ───────────────────────────────────────────────────────
 
+# ── Metric label + unit map (reference_key → display name, unit) ─────────────
+
+_METRIC_LABELS = {
+    # GA4
+    "google_analytics_4:all_sessions":  ("Sessoes", ""),
+    "google_analytics_4:total_users":   ("Usuarios Totais", ""),
+    "google_analytics_4:new_users":     ("Novos Usuarios", ""),
+    "google_analytics_4:all_pageviews": ("Pageviews", ""),
+    # Facebook Ads
+    "fb_ads:spend":       ("Investimento FB", "R$"),
+    "fb_ads:impressions": ("Impressoes FB", ""),
+    "fb_ads:clicks":      ("Cliques FB", ""),
+    "fb_ads:reach":       ("Alcance FB", ""),
+    "fb_ads:ctr":         ("CTR FB", "%"),
+    "fb_ads:cpm":         ("CPM FB", "R$"),
+    "fb_ads:cpc":         ("CPC FB", "R$"),
+    # Google Ads via Reportei
+    "gads:impressions":       ("Impressoes GAds", ""),
+    "gads:clicks":            ("Cliques GAds", ""),
+    "gads:cost_micros":       ("Gasto GAds", "R$"),
+    "gads:conversions":       ("Conversoes GAds", ""),
+    "gads:ctr":               ("CTR GAds", "%"),
+    "gads:average_cpc":       ("CPC Medio GAds", "R$"),
+    "gads:roas":              ("ROAS GAds", "x"),
+    "gads:cost_per_conversion": ("Custo/Conv GAds", "R$"),
+    # Search Console
+    "search_console:clicks":      ("Cliques Organicos", ""),
+    "search_console:impressions": ("Impressoes Organicas", ""),
+    "search_console:ctr":         ("CTR Organico", "%"),
+}
+
+
 def analyze_reportei_daily(data: dict, target_date: Any) -> AnalysisResult:
+    """
+    data: { integration_name: { "vs_prev_day": {ref_key: {current, comparison, pct_change}},
+                                 "vs_last_month": {ref_key: {...}}, ... } }
+    """
+    date_str = target_date.strftime("%d/%m/%Y") if hasattr(target_date, "strftime") else str(target_date)
     result = AnalysisResult(
         title="Reportei — Analise Diaria",
-        period_label=target_date.strftime("%d/%m/%Y") if hasattr(target_date, "strftime") else str(target_date),
-        comparison_label="Dia anterior e mesmo dia mes passado",
+        period_label=date_str,
+        comparison_label="Dia anterior e mesmo dia do mes passado",
     )
 
-    for int_id, int_data in data.items():
-        integration = int_data.get("integration", {})
-        source_name = integration.get("name") or integration.get("source") or f"Integracao {int_id}"
-        current = _extract_reportei_metrics(int_data.get("current", {}))
-        vs_prev = _extract_reportei_metrics(int_data.get("vs_previous_day", {}))
-        vs_lm = _extract_reportei_metrics(int_data.get("vs_same_day_last_month", {}))
+    for source_name, int_data in data.items():
+        vs_prev = int_data.get("vs_prev_day", {})
+        vs_lm   = int_data.get("vs_last_month", {})
 
-        for key, label, unit in _REPORTEI_METRIC_MAP:
-            if key in current and key in vs_prev:
-                m = _make_metric(f"{source_name} — {label}", current[key], vs_prev[key], unit)
-                result.metrics.append(m)
-                if m.is_anomaly:
-                    direction_word = "subiu" if m.direction == "up" else "caiu"
-                    result.anomalies.append(
-                        f"ANOMALIA [{source_name}]: {label} {direction_word} {m.formatted_pct} vs dia anterior"
+        for ref_key, metric_data in vs_prev.items():
+            label, unit = _METRIC_LABELS.get(ref_key, (ref_key.split(":")[-1], ""))
+            cur  = metric_data.get("current", 0) or 0
+            prev = metric_data.get("comparison", 0) or 0
+
+            m = _make_metric(f"{source_name} — {label}", cur, prev, unit)
+            result.metrics.append(m)
+
+            if m.is_anomaly:
+                direction_word = "subiu" if m.direction == "up" else "caiu"
+                result.anomalies.append(
+                    f"ANOMALIA [{source_name}]: {label} {direction_word} {m.formatted_pct} vs ontem "
+                    f"({m.formatted_previous} → {m.formatted_current})"
+                )
+
+            # Also compare vs same day last month
+            lm_data = vs_lm.get(ref_key, {})
+            lm_prev = lm_data.get("comparison", 0) or 0
+            if lm_prev and cur:
+                lm_pct = _pct(cur, lm_prev)
+                if abs(lm_pct) >= ANOMALY_THRESHOLD * 100:
+                    direction_word = "acima" if lm_pct > 0 else "abaixo"
+                    result.insights.append(
+                        f"{source_name} — {label}: {abs(lm_pct):.1f}% {direction_word} "
+                        f"do mesmo dia no mes passado ({_fmt(lm_prev, unit)} → {_fmt(cur, unit)})."
                     )
-                if key in vs_lm:
-                    lm_pct = _pct(current[key], vs_lm[key])
-                    if abs(lm_pct) >= ANOMALY_THRESHOLD * 100:
-                        direction_word = "acima" if lm_pct > 0 else "abaixo"
-                        result.insights.append(
-                            f"{source_name} — {label} esta {abs(lm_pct):.1f}% {direction_word} "
-                            f"do mesmo dia no mes passado."
-                        )
 
+    _generate_reportei_daily_insights(result, data)
     return result
 
 
 def analyze_reportei_monthly(data: dict) -> AnalysisResult:
+    """
+    data: { integration_name: { "data": {ref_key: {current, comparison, pct_change}},
+                                  "current_period": {start, end},
+                                  "comparison_period": {start, end} } }
+    """
     result = AnalysisResult(
         title="Reportei — Relatorio Mensal",
         period_label="",
         comparison_label="",
     )
 
-    for int_id, int_data in data.items():
-        integration = int_data.get("integration", {})
-        source_name = integration.get("name") or integration.get("source") or f"Integracao {int_id}"
-
+    for source_name, int_data in data.items():
         cp = int_data.get("current_period", {})
         pp = int_data.get("comparison_period", {})
 
         if cp and not result.period_label:
-            result.period_label = (
-                f"{cp.get('start', '').strftime('%d/%m') if hasattr(cp.get('start',''), 'strftime') else ''}"
-                f" - {cp.get('end', '').strftime('%d/%m/%Y') if hasattr(cp.get('end',''), 'strftime') else ''}"
-            )
-            result.comparison_label = (
-                f"{pp.get('start', '').strftime('%d/%m') if hasattr(pp.get('start',''), 'strftime') else ''}"
-                f" - {pp.get('end', '').strftime('%d/%m/%Y') if hasattr(pp.get('end',''), 'strftime') else ''}"
-            )
+            fmt_date = lambda d: d.strftime("%d/%m/%Y") if hasattr(d, "strftime") else str(d)
+            result.period_label = f"{fmt_date(cp.get('start'))} - {fmt_date(cp.get('end'))}"
+            result.comparison_label = f"{fmt_date(pp.get('start'))} - {fmt_date(pp.get('end'))}"
 
-        current = _extract_reportei_metrics(int_data.get("current", {}))
-        comparison = _extract_reportei_metrics(int_data.get("comparison", {}))
+        metrics_data = int_data.get("data", {})
+        for ref_key, metric_data in metrics_data.items():
+            label, unit = _METRIC_LABELS.get(ref_key, (ref_key.split(":")[-1], ""))
+            cur  = metric_data.get("current", 0) or 0
+            comp = metric_data.get("comparison", 0) or 0
 
-        for key, label, unit in _REPORTEI_METRIC_MAP:
-            if key in current and key in comparison:
-                m = _make_metric(f"{source_name} — {label}", current[key], comparison[key], unit)
-                result.metrics.append(m)
-                if m.is_anomaly:
-                    direction_word = "cresceu" if m.direction == "up" else "caiu"
-                    result.anomalies.append(
-                        f"{source_name}: {label} {direction_word} {m.formatted_pct} vs periodo anterior"
+            m = _make_metric(f"{source_name} — {label}", cur, comp, unit)
+            result.metrics.append(m)
+
+            if m.is_anomaly:
+                direction_word = "cresceu" if m.direction == "up" else "caiu"
+                result.anomalies.append(
+                    f"{source_name}: {label} {direction_word} {m.formatted_pct} vs periodo anterior "
+                    f"({m.formatted_previous} → {m.formatted_current})"
+                )
+
+    _generate_reportei_monthly_insights(result, data)
+    return result
+
+
+def _generate_reportei_daily_insights(result: AnalysisResult, data: dict):
+    """Add high-level narrative insights for daily report."""
+    for source_name, int_data in data.items():
+        vs_prev = int_data.get("vs_prev_day", {})
+
+        # GA4: sessions trend
+        sess = vs_prev.get("google_analytics_4:all_sessions", {})
+        if sess:
+            cur, prev = sess.get("current", 0), sess.get("comparison", 0)
+            if prev and cur:
+                chg = _pct(cur, prev)
+                if chg > 20:
+                    result.insights.append(
+                        f"Trafego: sessoes cresceram {chg:.1f}% vs ontem — dia com bom desempenho organico/pago."
+                    )
+                elif chg < -20:
+                    result.insights.append(
+                        f"Atencao: sessoes cairam {abs(chg):.1f}% vs ontem — verifique campanhas e status do site."
                     )
 
-        _generate_reportei_insights(result, source_name, current, comparison)
+        # Google Ads: ROAS check
+        roas = vs_prev.get("gads:roas", {})
+        if roas:
+            cur_roas = roas.get("current", 0)
+            if cur_roas and cur_roas < 1:
+                result.insights.append("Google Ads: ROAS abaixo de 1 — campanhas gastando mais do que gerando receita.")
+            elif cur_roas and cur_roas > 3:
+                result.insights.append(f"Google Ads: ROAS excelente ({cur_roas:.2f}x) — retorno muito positivo.")
 
-    return result
-
-
-_REPORTEI_METRIC_MAP = [
-    ("sessions", "Sessoes", ""),
-    ("users", "Usuarios", ""),
-    ("screenPageViews", "Pageviews", ""),
-    ("bounceRate", "Taxa de Rejeicao", "%"),
-    ("impressions", "Impressoes", ""),
-    ("clicks", "Cliques", ""),
-    ("cost", "Gasto", "R$"),
-    ("ctr", "CTR", "%"),
-    ("conversions", "Conversoes", ""),
-    ("reach", "Alcance", ""),
-    ("spend", "Investimento", "R$"),
-]
-
-
-def _extract_reportei_metrics(api_response: dict) -> dict:
-    """Flattens Reportei's metric response into a simple key->float dict."""
-    result = {}
-    if not api_response:
-        return result
-    data = api_response.get("data") or api_response
-    if isinstance(data, list):
-        for item in data:
-            if isinstance(item, dict):
-                key = item.get("reference_key") or item.get("key") or item.get("id")
-                value = item.get("value") or item.get("total") or 0
-                if key:
-                    try:
-                        result[key] = float(value)
-                    except (TypeError, ValueError):
-                        pass
-    elif isinstance(data, dict):
-        for k, v in data.items():
-            try:
-                result[k] = float(v)
-            except (TypeError, ValueError):
-                pass
-    return result
+        # Facebook: CPM spike
+        cpm = vs_prev.get("fb_ads:cpm", {})
+        if cpm:
+            cur_cpm, prev_cpm = cpm.get("current", 0), cpm.get("comparison", 0)
+            if prev_cpm and cur_cpm and _pct(cur_cpm, prev_cpm) > 50:
+                result.insights.append(
+                    f"Facebook Ads: CPM subiu {_pct(cur_cpm, prev_cpm):.1f}% vs ontem "
+                    f"(R$ {prev_cpm:.2f} → R$ {cur_cpm:.2f}) — mercado mais disputado hoje."
+                )
 
 
-def _generate_reportei_insights(result: AnalysisResult, source: str, cur: dict, prev: dict):
-    sessions_change = _pct(cur.get("sessions", 0), prev.get("sessions", 0))
-    if abs(sessions_change) > 15:
-        direction = "crescimento" if sessions_change > 0 else "queda"
-        result.insights.append(
-            f"{source}: {direction} de {abs(sessions_change):.1f}% em sessoes vs periodo anterior."
-        )
+def _generate_reportei_monthly_insights(result: AnalysisResult, data: dict):
+    """Add high-level narrative insights for monthly report."""
+    for source_name, int_data in data.items():
+        metrics_data = int_data.get("data", {})
 
-    bounce_cur = cur.get("bounceRate", 0)
-    bounce_prev = prev.get("bounceRate", 0)
-    if bounce_cur > 70:
-        result.insights.append(
-            f"{source}: Taxa de rejeicao alta ({bounce_cur:.1f}%) — otimize landing pages."
-        )
-    elif bounce_cur < bounce_prev - 5:
-        result.insights.append(
-            f"{source}: Taxa de rejeicao melhorou ({bounce_prev:.1f}% -> {bounce_cur:.1f}%)."
-        )
+        # Compare total ad spend FB + GAds
+        fb_spend = (metrics_data.get("fb_ads:spend", {}).get("current") or 0)
+        gads_spend = (metrics_data.get("gads:cost_micros", {}).get("current") or 0)
+        fb_spend_prev = (metrics_data.get("fb_ads:spend", {}).get("comparison") or 0)
+        gads_spend_prev = (metrics_data.get("gads:cost_micros", {}).get("comparison") or 0)
+
+        total_cur = fb_spend + gads_spend
+        total_prev = fb_spend_prev + gads_spend_prev
+        if total_prev and total_cur:
+            chg = _pct(total_cur, total_prev)
+            result.insights.append(
+                f"Investimento total em ads (FB + GAds): R$ {total_cur:.2f} vs R$ {total_prev:.2f} "
+                f"({'+' if chg >= 0 else ''}{chg:.1f}%) no periodo comparado."
+            )
+
+        # Organic clicks trend
+        sc_clicks = metrics_data.get("search_console:clicks", {})
+        if sc_clicks:
+            cur, comp = sc_clicks.get("current", 0), sc_clicks.get("comparison", 0)
+            if comp and cur:
+                chg = _pct(cur, comp)
+                if abs(chg) > 10:
+                    direction = "crescimento" if chg > 0 else "queda"
+                    result.insights.append(
+                        f"SEO: {direction} de {abs(chg):.1f}% em cliques organicos no periodo "
+                        f"({int(comp)} → {int(cur)} cliques)."
+                    )

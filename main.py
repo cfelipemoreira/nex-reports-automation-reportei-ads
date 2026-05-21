@@ -168,9 +168,10 @@ def start_scheduler():
         misfire_grace_time=3600,
     )
 
-    log.info("Scheduler iniciado. Proximos disparos:")
+    log.info("Scheduler configurado — aguardando inicio...")
+    log.info("Jobs agendados:")
     for job in scheduler.get_jobs():
-        log.info("  - %s: %s", job.name, job.next_run_time)
+        log.info("  - %s", job.name)
 
     try:
         scheduler.start()

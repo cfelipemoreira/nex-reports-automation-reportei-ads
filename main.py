@@ -23,6 +23,8 @@ from src import reportei_client as reportei_module
 from src.google_ads_client import GoogleAdsDirectClient
 from src import analyzer
 from src.html_generator import generate_html, html_path
+from src.gads_report import build_gads_report
+from src.pdf_generator import html_to_pdf, pdf_path
 from src import email_sender
 from src import git_manager
 
@@ -108,61 +110,37 @@ def job_reportei_weekly(run_date: date | None = None):
         log.exception("[reportei-weekly] Erro: %s", e)
 
 
-# ── Job: Google Ads daily ────────────────────────────────────────────────────
+# ── Job: Google Ads completo (diario + mensal em um PDF) ─────────────────────
 
-def job_gads_daily(run_date: date | None = None):
+def job_gads(run_date: date | None = None):
     today = run_date or date.today()
-    log.info("[gads-daily] Iniciando analise Google Ads para %s", today)
+    log.info("[gads] Iniciando relatorio completo Google Ads para %s", today)
     try:
-        raw      = gads.fetch_daily(today)
-        analysis = analyzer.analyze_google_ads_daily(raw)
+        daily_raw   = gads.fetch_daily(today)
+        monthly_raw = gads.fetch_monthly(today)
 
-        path = html_path("gads_daily", today.strftime("%Y-%m-%d"))
-        generate_html(analysis, path)
-        log.info("[gads-daily] HTML gerado: %s", path)
+        html_str  = build_gads_report(daily_raw, monthly_raw, today)
+        out_pdf   = pdf_path("gads_full", today.strftime("%Y-%m-%d"))
+        html_to_pdf(html_str, out_pdf)
+        log.info("[gads] PDF gerado: %s", out_pdf)
 
-        email_sender.send_google_ads_daily(path, today)
-        git_manager.commit_report("gads-daily", today.strftime("%Y-%m-%d"))
-        log.info("[gads-daily] Concluido.")
+        email_sender.send_google_ads_full(out_pdf, today)
+        git_manager.commit_report("gads-full", today.strftime("%Y-%m-%d"))
+        log.info("[gads] Concluido.")
 
     except Exception as e:
-        log.exception("[gads-daily] Erro: %s", e)
-
-
-# ── Job: Google Ads monthly (every Monday) ──────────────────────────────────
-
-def job_gads_monthly(run_date: date | None = None):
-    today = run_date or date.today()
-    log.info("[gads-monthly] Iniciando relatorio mensal Google Ads para %s", today)
-    try:
-        raw      = gads.fetch_monthly(today)
-        analysis = analyzer.analyze_google_ads_monthly(raw)
-
-        path = html_path("gads_monthly", today.strftime("%Y-%m-%d"))
-        generate_html(analysis, path)
-        log.info("[gads-monthly] HTML gerado: %s", path)
-
-        period_start = today.replace(day=1)
-        email_sender.send_google_ads_monthly(path, period_start, today)
-        git_manager.commit_report("gads-monthly", today.strftime("%Y-%m-%d"))
-        log.info("[gads-monthly] Concluido.")
-
-    except Exception as e:
-        log.exception("[gads-monthly] Erro: %s", e)
+        log.exception("[gads] Erro: %s", e)
 
 
 # ── Monday combined job ──────────────────────────────────────────────────────
 
 def job_monday(run_date: date | None = None):
-    """
-    Every Monday: runs all five jobs (daily + monthly + weekly for Reportei, daily + monthly for Ads).
-    """
+    """Every Monday: Reportei (daily + monthly + weekly) + Google Ads completo."""
     today = run_date or date.today()
     job_reportei_daily(today)
     job_reportei_monthly(today)
     job_reportei_weekly(today)
-    job_gads_daily(today)
-    job_gads_monthly(today)
+    job_gads(today)
 
 
 # ── Weekday (non-Monday) combined job ───────────────────────────────────────
@@ -170,7 +148,7 @@ def job_monday(run_date: date | None = None):
 def job_weekday(run_date: date | None = None):
     today = run_date or date.today()
     job_reportei_daily(today)
-    job_gads_daily(today)
+    job_gads(today)
 
 
 # ── Scheduler setup ──────────────────────────────────────────────────────────
@@ -213,14 +191,12 @@ _JOB_MAP = {
     "reportei-daily":   job_reportei_daily,
     "reportei-monthly": job_reportei_monthly,
     "reportei-weekly":  job_reportei_weekly,
-    "gads-daily":       job_gads_daily,
-    "gads-monthly":     job_gads_monthly,
+    "gads":             job_gads,
     "all": lambda: (
         job_reportei_daily(),
         job_reportei_monthly(),
         job_reportei_weekly(),
-        job_gads_daily(),
-        job_gads_monthly(),
+        job_gads(),
     ),
 }
 

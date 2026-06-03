@@ -151,6 +151,48 @@ def send_reportei_weekly(html_path: str, week_start: date, week_end: date):
     )
 
 
+def send_google_ads_full(pdf_path: str, analysis_date: date):
+    """Envia o relatorio completo Google Ads (diario + mensal) como PDF."""
+    if not os.path.exists(pdf_path):
+        raise FileNotFoundError(f"PDF nao encontrado: {pdf_path}")
+
+    period_start = analysis_date.replace(day=1)
+    subject = f"[Google Ads] Relatorio Completo — {analysis_date.strftime('%d/%m/%Y')}"
+
+    msg = MIMEMultipart("mixed")
+    msg["From"] = config.GMAIL_USER
+    msg["To"]   = config.EMAIL_DAILY_TO
+    msg["Subject"] = subject
+
+    body_html = _build_email_body(
+        subject=subject,
+        period=f"{analysis_date.strftime('%d/%m/%Y')} + {period_start.strftime('%d/%m')} a {analysis_date.strftime('%d/%m/%Y')}",
+        comparison="Dia anterior + mes anterior (MTD)",
+        report_type="Google Ads Completo",
+    )
+    msg.attach(MIMEText(body_html, "html", "utf-8"))
+
+    from email.mime.application import MIMEApplication
+    with open(pdf_path, "rb") as f:
+        attachment = MIMEApplication(f.read(), _subtype="pdf")
+        attachment.add_header(
+            "Content-Disposition", "attachment",
+            filename=os.path.basename(pdf_path),
+        )
+        msg.attach(attachment)
+
+    context = ssl.create_default_context()
+    with smtplib.SMTP(_SMTP_HOST, _SMTP_PORT) as server:
+        server.ehlo()
+        server.starttls(context=context)
+        server.login(config.GMAIL_USER, config.GMAIL_APP_PASSWORD)
+        server.sendmail(config.GMAIL_USER, config.EMAIL_DAILY_TO, msg.as_string())
+
+    print(f"[email] PDF Google Ads enviado para {config.EMAIL_DAILY_TO}: {subject}")
+
+
+# ── Legacy wrappers (mantidos para compatibilidade) ──────────────────────────
+
 def send_google_ads_daily(html_path: str, analysis_date: date):
     send_report(
         to=config.EMAIL_DAILY_TO,

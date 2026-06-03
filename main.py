@@ -20,6 +20,7 @@ from apscheduler.triggers.cron import CronTrigger
 
 from config import config
 from src import reportei_client as reportei_module
+from src.google_ads_client import GoogleAdsDirectClient
 from src import analyzer
 from src.html_generator import generate_html, html_path
 from src import email_sender
@@ -32,8 +33,9 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
-TZ = pytz.timezone(config.TIMEZONE)
+TZ      = pytz.timezone(config.TIMEZONE)
 reportei = reportei_module.ReporteiClient()
+gads     = GoogleAdsDirectClient()
 
 
 # ── Job: Reportei daily ──────────────────────────────────────────────────────
@@ -112,7 +114,7 @@ def job_gads_daily(run_date: date | None = None):
     today = run_date or date.today()
     log.info("[gads-daily] Iniciando analise Google Ads para %s", today)
     try:
-        raw      = reportei.fetch_gads_daily(today)
+        raw      = gads.fetch_daily(today)
         analysis = analyzer.analyze_google_ads_daily(raw)
 
         path = html_path("gads_daily", today.strftime("%Y-%m-%d"))
@@ -133,7 +135,7 @@ def job_gads_monthly(run_date: date | None = None):
     today = run_date or date.today()
     log.info("[gads-monthly] Iniciando relatorio mensal Google Ads para %s", today)
     try:
-        raw      = reportei.fetch_gads_monthly(today)
+        raw      = gads.fetch_monthly(today)
         analysis = analyzer.analyze_google_ads_monthly(raw)
 
         path = html_path("gads_monthly", today.strftime("%Y-%m-%d"))

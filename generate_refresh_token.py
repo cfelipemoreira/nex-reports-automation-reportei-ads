@@ -56,10 +56,35 @@ def main():
     }
 
     flow = InstalledAppFlow.from_client_config(client_config, scopes=SCOPES)
-    try:
-        creds = flow.run_local_server(port=8080, prompt="consent", access_type="offline")
-    except Exception:
-        creds = flow.run_console()
+
+    # Tenta abrir servidor local em portas alternativas
+    creds = None
+    for port in [8080, 8888, 9090, 9999]:
+        try:
+            creds = flow.run_local_server(
+                port=port, prompt="consent", access_type="offline",
+                open_browser=True,
+            )
+            break
+        except OSError:
+            print(f"  Porta {port} ocupada, tentando proxima...")
+            continue
+
+    # Fallback: fluxo manual via URL + codigo
+    if creds is None:
+        import webbrowser
+        auth_url, _ = flow.authorization_url(
+            prompt="consent", access_type="offline"
+        )
+        print("\n--- AUTORIZACAO MANUAL ---")
+        print("Nao foi possivel abrir servidor local.")
+        print("Abra o link abaixo no navegador:\n")
+        print(auth_url)
+        webbrowser.open(auth_url)
+        print("\nApos autorizar, cole o codigo de autorizacao aqui:")
+        code = input("Codigo: ").strip()
+        flow.fetch_token(code=code)
+        creds = flow.credentials
 
     new_token = creds.refresh_token
     print(f"\nRefresh Token: {new_token}\n")

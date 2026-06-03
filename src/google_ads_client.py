@@ -1,189 +1,160 @@
+"""
+Google Ads API client — direct integration via google-ads Python library.
+Credentials loaded from google-ads.yaml (not in version control).
+
+Public API:
+    GoogleAdsDirectClient.fetch_daily(target_date)   -> dict  (for analyze_google_ads_daily)
+    GoogleAdsDirectClient.fetch_monthly(target_date) -> dict  (for analyze_google_ads_monthly)
+"""
+from __future__ import annotations
 import os
 from datetime import date, timedelta
-from google.ads.googleads.client import GoogleAdsClient
-from google.ads.googleads.errors import GoogleAdsException
-from config import config
+
+BASE_DIR    = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+YAML_PATH   = os.path.join(BASE_DIR, "google-ads.yaml")
+CUSTOMER_ID = "9772636001"
 
 
-_YAML_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "google-ads.yaml")
+class GoogleAdsDirectClient:
+    def __init__(self):
+        from google.ads.googleads.client import GoogleAdsClient
+        self._client  = GoogleAdsClient.load_from_storage(YAML_PATH)
+        self._service = self._client.get_service("GoogleAdsService")
 
+    # ── Core queries ──────────────────────────────────────────────────────────
 
-def _get_client() -> GoogleAdsClient:
-    return GoogleAdsClient.load_from_storage(_YAML_PATH)
+    def _account_metrics(self, start: date, end: date) -> dict:
+        """Aggregated account-level metrics for a date range."""
+        query = f"""
+            SELECT
+              metrics.impressions,
+              metrics.clicks,
+              metrics.cost_micros,
+              metrics.conversions,
+              metrics.conversions_value,
+              metrics.ctr,
+              metrics.average_cpc,
+              metrics.cost_per_conversion
+            FROM customer
+            WHERE segments.date BETWEEN '{start}' AND '{end}'
+        """
+        rows = list(self._service.search(customer_id=CUSTOMER_ID, query=query))
 
+        impressions = clicks = cost = conversions = conv_value = 0.0
+        for row in rows:
+            m = row.metrics
+            impressions  += m.impressions
+            clicks       += m.clicks
+            cost         += m.cost_micros / 1_000_000
+            conversions  += m.conversions
+            conv_value   += m.conversions_value
 
-def _date_range_clause(start: date, end: date) -> str:
-    return f"segments.date BETWEEN '{start}' AND '{end}'"
+        ctr     = (clicks / impressions * 100) if impressions else 0.0
+        avg_cpc = (cost / clicks)              if clicks      else 0.0
+        cpp     = (cost / conversions)         if conversions else 0.0
+        roas    = (conv_value / cost)          if cost        else 0.0
 
+        return {
+            "impressions":         impressions,
+            "clicks":              clicks,
+            "cost":                cost,
+            "conversions":         conversions,
+            "ctr":                 ctr,
+            "avg_cpc":             avg_cpc,
+            "cost_per_conversion": cpp,
+            "roas":                roas,
+        }
 
-def _run_query(query: str) -> list:
-    client = _get_client()
-    ga_service = client.get_service("GoogleAdsService")
-    response = ga_service.search_stream(
-        customer_id=config.GOOGLE_ADS_CUSTOMER_ID,
-        query=query,
-    )
-    rows = []
-    for batch in response:
-        for row in batch.results:
-            rows.append(row)
-    return rows
+    def _top_campaigns(self, start: date, end: date, limit: int = 5) -> list[dict]:
+        """Top campaigns by cost for the date range."""
+        query = f"""
+            SELECT
+              campaign.name,
+              metrics.impressions,
+              metrics.clicks,
+              metrics.cost_micros,
+              metrics.conversions,
+              metrics.ctr
+            FROM campaign
+            WHERE segments.date BETWEEN '{start}' AND '{end}'
+              AND campaign.status = 'ENABLED'
+            ORDER BY metrics.cost_micros DESC
+            LIMIT {limit}
+        """
+        rows = list(self._service.search(customer_id=CUSTOMER_ID, query=query))
 
+        # Aggregate by campaign name (multiple date rows possible)
+        by_name: dict[str, dict] = {}
+        for row in rows:
+            name = row.campaign.name
+            if name not in by_name:
+                by_name[name] = {"name": name, "impressions": 0, "clicks": 0,
+                                 "cost": 0.0, "conversions": 0.0}
+            m = row.metrics
+            by_name[name]["impressions"] += m.impressions
+            by_name[name]["clicks"]      += m.clicks
+            by_name[name]["cost"]        += m.cost_micros / 1_000_000
+            by_name[name]["conversions"] += m.conversions
 
-# ── Queries ────────────────────────────────────────────────────────────────
+        result = sorted(by_name.values(), key=lambda x: x["cost"], reverse=True)
+        for c in result:
+            c["ctr"] = (c["clicks"] / c["impressions"] * 100) if c["impressions"] else 0.0
+        return result
 
-_ACCOUNT_QUERY = """
-    SELECT
-        customer.descriptive_name,
-        customer.currency_code,
-        metrics.impressions,
-        metrics.clicks,
-        metrics.ctr,
-        metrics.average_cpc,
-        metrics.cost_micros,
-        metrics.conversions,
-        metrics.conversions_value,
-        metrics.cost_per_conversion,
-        segments.date
-    FROM customer
-    WHERE {date_clause}
-    ORDER BY segments.date DESC
-"""
+    # ── Public API ─────────────────────────────────────────────────────────────
 
-_CAMPAIGN_QUERY = """
-    SELECT
-        campaign.name,
-        campaign.status,
-        metrics.impressions,
-        metrics.clicks,
-        metrics.ctr,
-        metrics.average_cpc,
-        metrics.cost_micros,
-        metrics.conversions,
-        metrics.conversions_value,
-        metrics.cost_per_conversion,
-        segments.date
-    FROM campaign
-    WHERE {date_clause}
-      AND campaign.status != 'REMOVED'
-    ORDER BY metrics.cost_micros DESC
-    LIMIT 20
-"""
+    def fetch_daily(self, target_date: date) -> dict:
+        """
+        Returns dict compatible with analyzer.analyze_google_ads_daily().
+        Compares target_date vs previous day.
+        """
+        prev_day  = target_date - timedelta(days=1)
+        current   = self._account_metrics(target_date, target_date)
+        previous  = self._account_metrics(prev_day, prev_day)
+        campaigns = self._top_campaigns(target_date, target_date)
 
-_AD_GROUP_QUERY = """
-    SELECT
-        ad_group.name,
-        campaign.name,
-        metrics.impressions,
-        metrics.clicks,
-        metrics.cost_micros,
-        metrics.conversions,
-        segments.date
-    FROM ad_group
-    WHERE {date_clause}
-      AND ad_group.status != 'REMOVED'
-    ORDER BY metrics.cost_micros DESC
-    LIMIT 10
-"""
+        # _raw dict keyed by reference_key for analyzer._analyze_gads()
+        raw = {
+            "gads:impressions":         {"current": current["impressions"],         "comparison": previous["impressions"]},
+            "gads:clicks":              {"current": current["clicks"],              "comparison": previous["clicks"]},
+            "gads:cost_micros":         {"current": current["cost"],                "comparison": previous["cost"]},
+            "gads:conversions":         {"current": current["conversions"],         "comparison": previous["conversions"]},
+            "gads:ctr":                 {"current": current["ctr"],                 "comparison": previous["ctr"]},
+            "gads:average_cpc":         {"current": current["avg_cpc"],             "comparison": previous["avg_cpc"]},
+            "gads:roas":                {"current": current["roas"],                "comparison": previous["roas"]},
+            "gads:cost_per_conversion": {"current": current["cost_per_conversion"], "comparison": previous["cost_per_conversion"]},
+        }
 
+        return {
+            "date":      target_date,
+            "prev_date": prev_day,
+            "current":   current,
+            "previous":  previous,
+            "campaigns": campaigns,
+            "_raw":      raw,
+        }
 
-# ── Aggregation helpers ─────────────────────────────────────────────────────
+    def fetch_monthly(self, target_date: date) -> dict:
+        """
+        Returns dict compatible with analyzer.analyze_google_ads_monthly().
+        Compares 01/month → target_date vs same period last month.
+        """
+        current_start = target_date.replace(day=1)
+        current_end   = target_date
 
-def _aggregate_rows(rows: list) -> dict:
-    totals = {
-        "impressions": 0,
-        "clicks": 0,
-        "cost": 0.0,
-        "conversions": 0.0,
-        "conversions_value": 0.0,
-    }
-    for row in rows:
-        m = row.metrics
-        totals["impressions"] += m.impressions
-        totals["clicks"] += m.clicks
-        totals["cost"] += m.cost_micros / 1_000_000
-        totals["conversions"] += m.conversions
-        totals["conversions_value"] += m.conversions_value
+        last_month      = target_date.month - 1 if target_date.month > 1 else 12
+        last_month_year = target_date.year if target_date.month > 1 else target_date.year - 1
+        comp_start = target_date.replace(year=last_month_year, month=last_month, day=1)
+        comp_end   = target_date.replace(year=last_month_year, month=last_month)
 
-    totals["ctr"] = (totals["clicks"] / totals["impressions"] * 100) if totals["impressions"] else 0
-    totals["avg_cpc"] = (totals["cost"] / totals["clicks"]) if totals["clicks"] else 0
-    totals["cost_per_conversion"] = (totals["cost"] / totals["conversions"]) if totals["conversions"] else 0
-    totals["roas"] = (totals["conversions_value"] / totals["cost"]) if totals["cost"] else 0
-    return totals
+        current    = self._account_metrics(current_start, current_end)
+        comparison = self._account_metrics(comp_start, comp_end)
+        campaigns  = self._top_campaigns(current_start, current_end)
 
-
-def _campaigns_to_list(rows: list) -> list[dict]:
-    campaigns: dict[str, dict] = {}
-    for row in rows:
-        name = row.campaign.name
-        if name not in campaigns:
-            campaigns[name] = {
-                "name": name,
-                "status": row.campaign.status.name,
-                "impressions": 0,
-                "clicks": 0,
-                "cost": 0.0,
-                "conversions": 0.0,
-            }
-        m = row.metrics
-        campaigns[name]["impressions"] += m.impressions
-        campaigns[name]["clicks"] += m.clicks
-        campaigns[name]["cost"] += m.cost_micros / 1_000_000
-        campaigns[name]["conversions"] += m.conversions
-
-    result = list(campaigns.values())
-    for c in result:
-        c["ctr"] = (c["clicks"] / c["impressions"] * 100) if c["impressions"] else 0
-        c["avg_cpc"] = (c["cost"] / c["clicks"]) if c["clicks"] else 0
-    return sorted(result, key=lambda x: x["cost"], reverse=True)
-
-
-# ── Public API ──────────────────────────────────────────────────────────────
-
-def fetch_daily_data(target_date: date) -> dict:
-    """
-    Fetches account-level + campaign-level data for `target_date`
-    and the previous day, returning both for comparison.
-    """
-    prev_day = target_date - timedelta(days=1)
-
-    current_rows = _run_query(_ACCOUNT_QUERY.format(date_clause=_date_range_clause(target_date, target_date)))
-    prev_rows = _run_query(_ACCOUNT_QUERY.format(date_clause=_date_range_clause(prev_day, prev_day)))
-    campaign_rows = _run_query(_CAMPAIGN_QUERY.format(date_clause=_date_range_clause(target_date, target_date)))
-
-    return {
-        "date": target_date,
-        "prev_date": prev_day,
-        "current": _aggregate_rows(current_rows),
-        "previous": _aggregate_rows(prev_rows),
-        "campaigns": _campaigns_to_list(campaign_rows),
-    }
-
-
-def fetch_monthly_period_data(target_date: date) -> dict:
-    """
-    Fetches data from 1st of current month to `target_date`,
-    compared with the same period last month.
-    """
-    current_start = target_date.replace(day=1)
-    current_end = target_date
-
-    last_month = target_date.month - 1 if target_date.month > 1 else 12
-    last_month_year = target_date.year if target_date.month > 1 else target_date.year - 1
-    comparison_start = target_date.replace(year=last_month_year, month=last_month, day=1)
-    comparison_end = target_date.replace(year=last_month_year, month=last_month)
-
-    current_rows = _run_query(_ACCOUNT_QUERY.format(
-        date_clause=_date_range_clause(current_start, current_end)))
-    comparison_rows = _run_query(_ACCOUNT_QUERY.format(
-        date_clause=_date_range_clause(comparison_start, comparison_end)))
-    campaign_rows = _run_query(_CAMPAIGN_QUERY.format(
-        date_clause=_date_range_clause(current_start, current_end)))
-
-    return {
-        "current_period": {"start": current_start, "end": current_end},
-        "comparison_period": {"start": comparison_start, "end": comparison_end},
-        "current": _aggregate_rows(current_rows),
-        "comparison": _aggregate_rows(comparison_rows),
-        "campaigns": _campaigns_to_list(campaign_rows),
-    }
+        return {
+            "current_period":    {"start": current_start, "end": current_end},
+            "comparison_period": {"start": comp_start,    "end": comp_end},
+            "current":           current,
+            "comparison":        comparison,
+            "campaigns":         campaigns,
+        }

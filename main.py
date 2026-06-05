@@ -35,9 +35,18 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
-TZ      = pytz.timezone(config.TIMEZONE)
+TZ       = pytz.timezone(config.TIMEZONE)
 reportei = reportei_module.ReporteiClient()
-gads     = GoogleAdsDirectClient()
+
+# GoogleAdsDirectClient é inicializado de forma lazy dentro de cada job
+# para que erros de credencial não derrubem o scheduler inteiro.
+_gads_client: GoogleAdsDirectClient | None = None
+
+def _get_gads() -> GoogleAdsDirectClient:
+    global _gads_client
+    if _gads_client is None:
+        _gads_client = GoogleAdsDirectClient()
+    return _gads_client
 
 
 # ── Job: Reportei daily ──────────────────────────────────────────────────────
@@ -116,6 +125,7 @@ def job_gads(run_date: date | None = None):
     today = run_date or date.today()
     log.info("[gads] Iniciando relatorio completo Google Ads para %s", today)
     try:
+        gads = _get_gads()
         daily_raw   = gads.fetch_daily(today)
         monthly_raw = gads.fetch_monthly(today)
 
@@ -156,22 +166,26 @@ def job_weekday(run_date: date | None = None):
 def start_scheduler():
     scheduler = BlockingScheduler(timezone=TZ)
 
-    # Tue–Sun at 12:00 — daily reports only
+    # Tue–Sun at 11:50 — daily reports only
+    # misfire_grace_time=28800 (8h): se o Mac estiver dormindo ao meio-dia e
+    # acordar até as 19h50, o job ainda roda no mesmo dia.
     scheduler.add_job(
         job_weekday,
-        trigger=CronTrigger(day_of_week="tue,wed,thu,fri,sat,sun", hour=12, minute=0, timezone=TZ),
+        trigger=CronTrigger(day_of_week="tue,wed,thu,fri,sat,sun", hour=11, minute=50, timezone=TZ),
         id="weekday_daily",
-        name="Relatorios diarios (ter-dom)",
-        misfire_grace_time=3600,
+        name="Relatorios diarios (ter-dom) — 11h50",
+        misfire_grace_time=28800,
+        coalesce=True,
     )
 
-    # Every Monday at 12:00 — daily + monthly + weekly reports
+    # Every Monday at 11:50 — daily + monthly + weekly reports
     scheduler.add_job(
         job_monday,
-        trigger=CronTrigger(day_of_week="mon", hour=12, minute=0, timezone=TZ),
+        trigger=CronTrigger(day_of_week="mon", hour=11, minute=50, timezone=TZ),
         id="monday_full",
-        name="Segunda-feira: diario + mensal + semanal",
-        misfire_grace_time=3600,
+        name="Segunda-feira: diario + mensal + semanal — 11h50",
+        misfire_grace_time=28800,
+        coalesce=True,
     )
 
     log.info("Scheduler configurado — aguardando inicio...")

@@ -1,0 +1,109 @@
+{\rtf1\ansi\ansicpg1252\deff0\deflang1046
+{\fonttbl{\f0\fswiss\fcharset0 Arial;}{\f1\fmodern\fcharset0 Courier New;}}
+{\colortbl ;\red26\green26\blue46;\red15\green52\blue96;\red74\green85\blue104;\red26\green32\blue44;\red160\green174\blue192;\red255\green255\blue255;\red237\green242\blue247;}
+\widowctrl\hyphauto
+\margl1800\margr1800\margt1440\margb1440
+\f0\fs22\cf4
+{\pard\ql\sb400\sa40 {\cf2\fs20 NEX COWORKING}\par}
+{\pard\ql\sa100 {\b\cf1\fs52 Design Documentation}\par}
+{\pard\ql\sb60\sa40 {\cf2\fs34 NEX Reports Automation}\par}
+{\pard\ql\sa240 {\cf3\fs24 Google Ads API Integration  \u8212?  Standard Access Request}\par}
+{\pard\ql\sb60\sa60\li360 {\b\cf1 Document Version:}  {\cf3 1.0}\par}
+{\pard\ql\sb60\sa60\li360 {\b\cf1 Date:}  {\cf3 June 2026}\par}
+{\pard\ql\sb60\sa60\li360 {\b\cf1 Author:}  {\cf3 Felipe Moreira}\par}
+{\pard\ql\sb60\sa60\li360 {\b\cf1 Contact:}  {\cf3 cfelipemoreira@gmail.com}\par}
+{\pard\ql\sb60\sa60\li360 {\b\cf1 Organization:}  {\cf3 NEX Coworking  (nex.work)}\par}
+{\pard\ql\sb60\sa60\li360 {\b\cf1 Classification:}  {\cf3 Confidential \u8212? Internal Use Only}\par}
+{\pard\sb160\sa160\brdrb\brdrs\brdrw10\brdrcf5\par}
+{\pard\ql\sb320\sa60\brdrb\brdrs\brdrw6\brdrcf5 {\cf2\fs28 1.  }{\b\cf1\fs28 Tool Overview}\par}
+{\pard\ql\sb100\sa80 {\cf4 NEX Reports Automation is an internal automated reporting system developed exclusively for NEX Coworking, a coworking space brand operating in Brazil (nex.work). The tool integrates with multiple digital marketing platforms to collect performance data, generate structured analytical reports, and deliver them automatically to the internal marketing team via email on a daily and weekly schedule.}\par}
+{\pard\ql\sb80\sa40 {\cf3 The system connects to the following data sources:}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\cf4 Google Ads \u8212? NEX.WORK account (Customer ID: 977-263-6001)}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\cf4 Google Analytics 4 \u8212? website traffic and user behavior}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\cf4 Facebook Ads \u8212? NEX Curitiba paid social campaigns}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\cf4 Google Search Console \u8212? organic search performance (nex.work)}\par}
+{\pard\ql\sb80\sa80 {\cf4 All data collected is used solely for internal analysis. The tool does not expose, sell, or share any data with third parties, and performs no write operations on any connected platform.}\par}
+{\pard\sb160\sa160\brdrb\brdrs\brdrw10\brdrcf5\par}
+{\pard\ql\sb320\sa60\brdrb\brdrs\brdrw6\brdrcf5 {\cf2\fs28 2.  }{\b\cf1\fs28 Purpose and Business Use Case}\par}
+{\pard\ql\sb100\sa80 {\cf4 The primary purpose of NEX Reports Automation is to eliminate the manual effort involved in pulling, consolidating, and interpreting marketing performance data across multiple advertising platforms. Prior to this tool, the marketing team spent several hours each week manually accessing each platform, extracting metrics, and compiling summaries.}\par}
+{\pard\ql\sb80\sa40 {\cf3 The tool addresses this by:}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\cf4 Automatically fetching data from all connected platforms once per day at 12:00 BRT}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\cf4 Detecting anomalies and significant variations (>20% change) across key metrics}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\cf4 Generating structured HTML reports with executive summary, insights, and recommended actions}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\cf4 Delivering reports via email to the appropriate team members on a defined schedule}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\cf4 Committing all generated reports to a private version-controlled repository for historical reference}\par}
+{\pard\ql\sb80\sa80 {\cf4 The tool is used exclusively for internal business intelligence. There are no end-user-facing features, no public interfaces, and no multi-tenant or SaaS characteristics. It is a single-operator internal automation.}\par}
+{\pard\sb160\sa160\brdrb\brdrs\brdrw10\brdrcf5\par}
+{\pard\ql\sb320\sa60\brdrb\brdrs\brdrw6\brdrcf5 {\cf2\fs28 3.  }{\b\cf1\fs28 Google Ads API Usage}\par}
+{\pard\ql\sb100\sa80 {\cf4 The tool integrates with the Google Ads API exclusively to read advertising performance metrics for the NEX.WORK Google Ads account. No write, create, or delete operations are performed at any time.}\par}
+{\pard\ql\sb100\sa40 {\b\cf1\fs23 Account and Access Details}\par}
+{\pard\ql\sb60\sa60\li360 {\b\cf1 Account Name:}  {\cf3 NEX.WORK}\par}
+{\pard\ql\sb60\sa60\li360 {\b\cf1 Customer ID:}  {\cf3 977-263-6001}\par}
+{\pard\ql\sb60\sa60\li360 {\b\cf1 Access Type:}  {\cf3 Read-only (no write operations)}\par}
+{\pard\ql\sb60\sa60\li360 {\b\cf1 API Library:}  {\cf3 google-ads Python client library (official)}\par}
+{\pard\ql\sb60\sa60\li360 {\b\cf1 Authentication:}  {\cf3 OAuth 2.0 with offline refresh token}\par}
+{\pard\ql\sb60\sa60\li360 {\b\cf1 Call Frequency:}  {\cf3 Once daily (12:00 BRT) + once weekly (Mondays)}\par}
+{\pard\ql\sb60\sa60\li360 {\b\cf1 MCC Account:}  {\cf3 Managed via cfelipemoreira@gmail.com (administrator)}\par}
+{\pard\ql\sb120\sa40 {\b\cf1\fs23 Metrics Retrieved}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\cf4 Impressions \u8212? total ad impressions in the period}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\cf4 Clicks \u8212? total clicks on ads}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\cf4 Cost \u8212? total spend (cost_micros, converted to BRL)}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\cf4 Conversions \u8212? total conversion events tracked}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\cf4 CTR (Click-Through Rate)}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\cf4 Average CPC (Cost Per Click)}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\cf4 ROAS (Return on Ad Spend)}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\cf4 Cost Per Conversion}\par}
+{\pard\ql\sb80\sa80 {\cf4 Data is fetched for two comparison windows per report cycle: the current period vs. the previous period (prior day for daily reports; prior month-to-date for monthly reports). No raw user-level or audience data is accessed \u8212? only aggregated campaign-level metrics are retrieved.}\par}
+{\pard\sb160\sa160\brdrb\brdrs\brdrw10\brdrcf5\par}
+{\pard\ql\sb320\sa60\brdrb\brdrs\brdrw6\brdrcf5 {\cf2\fs28 4.  }{\b\cf1\fs28 Technical Architecture}\par}
+{\pard\ql\sb60\sa60\li360 {\b\cf1 Language:}  {\cf3 Python 3.14}\par}
+{\pard\ql\sb60\sa60\li360 {\b\cf1 Scheduler:}  {\cf3 APScheduler + macOS launchd (runs at 12:00 BRT daily)}\par}
+{\pard\ql\sb60\sa60\li360 {\b\cf1 Report Format:}  {\cf3 Self-contained HTML with inline CSS styling}\par}
+{\pard\ql\sb60\sa60\li360 {\b\cf1 Email Delivery:}  {\cf3 Gmail SMTP via STARTTLS (App Password authentication)}\par}
+{\pard\ql\sb60\sa60\li360 {\b\cf1 Version Control:}  {\cf3 Private GitHub repository (cfelipemoreira/nex-reports-automation-reportei-ads)}\par}
+{\pard\ql\sb60\sa60\li360 {\b\cf1 Data Storage:}  {\cf3 Local filesystem + private Git repository (no external database)}\par}
+{\pard\ql\sb60\sa60\li360 {\b\cf1 Runtime Env.:}  {\cf3 macOS, single private machine owned by the operator}\par}
+{\pard\ql\sb120\sa40 {\b\cf1\fs23 Report Generation Pipeline}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\b\cf1 Step 1: }{\cf4 Scheduler triggers job at 12:00 BRT}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\b\cf1 Step 2: }{\cf4 ReporteiClient fetches metrics from each integrated platform via Reportei API v2}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\b\cf1 Step 3: }{\cf4 Analyzer module processes raw data into structured PlatformAnalysis objects}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\b\cf1 Step 4: }{\cf4 HTML generator renders a complete report with executive summary, metric boxes, anomalies, insights, and recommended actions}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\b\cf1 Step 5: }{\cf4 Email sender delivers the HTML report as an attachment via Gmail SMTP}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\b\cf1 Step 6: }{\cf4 Git manager commits the generated report to the private repository}\par}
+{\pard\sb160\sa160\brdrb\brdrs\brdrw10\brdrcf5\par}
+{\pard\ql\sb320\sa60\brdrb\brdrs\brdrw6\brdrcf5 {\cf2\fs28 5.  }{\b\cf1\fs28 Data Access and Security}\par}
+{\pard\ql\sb100\sa80 {\cf4 All credentials and authentication tokens are stored in local configuration files on the operator's private machine. These files are explicitly excluded from version control via .gitignore, ensuring no secrets are ever committed to the GitHub repository.}\par}
+{\pard\ql\sb80\sa40 {\cf3 Security measures in place:}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\cf4 API credentials (developer token, OAuth refresh token, client ID/secret) stored in google-ads.yaml \u8212? excluded from version control}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\cf4 SMTP credentials and Reportei API token stored in .env \u8212? excluded from version control}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\cf4 No data is stored in any cloud database, third-party service, or public-facing system}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\cf4 The GitHub repository is private and accessible only to the operator}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\cf4 Google Ads data access is scoped to a single account (977-263-6001) and is read-only}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\cf4 OAuth tokens are rotated when expired via a dedicated local utility script}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\cf4 No user-level, audience, or personally identifiable information (PII) is accessed or stored}\par}
+{\pard\sb160\sa160\brdrb\brdrs\brdrw10\brdrcf5\par}
+{\pard\ql\sb320\sa60\brdrb\brdrs\brdrw6\brdrcf5 {\cf2\fs28 6.  }{\b\cf1\fs28 Users and Scope}\par}
+{\pard\ql\sb60\sa60\li360 {\b\cf1 Developer / Operator:}  {\cf3 Felipe Moreira (cfelipemoreira@gmail.com)}\par}
+{\pard\ql\sb60\sa60\li360 {\b\cf1 Report Recipients:}  {\cf3 felipe@nex.work  /  felipe@nexcoworking.com.br}\par}
+{\pard\ql\sb60\sa60\li360 {\b\cf1 Number of End Users:}  {\cf3 1 (single-operator internal tool)}\par}
+{\pard\ql\sb60\sa60\li360 {\b\cf1 Deployment Scope:}  {\cf3 Internal only \u8212? not a SaaS product or public service}\par}
+{\pard\ql\sb60\sa60\li360 {\b\cf1 Third-Party Access:}  {\cf3 None \u8212? no data is shared with external parties}\par}
+{\pard\ql\sb60\sa60\li360 {\b\cf1 Commercial Use:}  {\cf3 No \u8212? tool is used for internal reporting only, not for resale}\par}
+{\pard\ql\sb100\sa80 {\cf4 This tool is not distributed to any external users. It is not offered as a service, does not have a public API, and is not accessible outside of the operator's private machine. Its sole function is to automate internal marketing reporting for a single business.}\par}
+{\pard\sb160\sa160\brdrb\brdrs\brdrw10\brdrcf5\par}
+{\pard\ql\sb320\sa60\brdrb\brdrs\brdrw6\brdrcf5 {\cf2\fs28 7.  }{\b\cf1\fs28 Compliance}\par}
+{\pard\ql\sb40 \par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\cf4 The tool complies fully with the Google Ads API Terms of Service}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\cf4 Data is used solely for reporting and analysis of the advertiser's own account}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\cf4 No automation of ad creation, bidding, or campaign management is performed}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\cf4 No scraping or unauthorized data access is performed \u8212? only official API endpoints are used}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\cf4 The developer token is associated with a Google account that has Manager (MCC) access to the NEX.WORK account}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\cf4 OAuth 2.0 authorization follows Google's recommended offline access flow}\par}
+{\pard\ql\sb60\sa60\li560\fi-280 \u8226?  {\cf4 No Google Ads data is used for training machine learning models or resold in any form}\par}
+{\pard\sb160\sa160\brdrb\brdrs\brdrw10\brdrcf5\par}
+{\pard\ql\sb120\sa40 {\cf3\fs20 Document prepared by:}\par}
+{\pard\ql\sa20 {\b\cf1\fs24 Felipe Moreira}\par}
+{\pard\ql\sa20 {\cf3\fs20 Owner & Developer  \u8212?  NEX Coworking}\par}
+{\pard\ql\sa20 {\cf2\fs20 cfelipemoreira@gmail.com  |  nex.work}\par}
+{\pard\ql {\cf3\fs20 June 2026}\par}
+}

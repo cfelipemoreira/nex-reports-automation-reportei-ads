@@ -1,0 +1,82 @@
+2026-06-02 12:35:15 [INFO] Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-02 12:35:15 [INFO] Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-02 12:35:15 [INFO] Scheduler configurado — aguardando inicio...
+2026-06-02 12:35:15 [INFO] Jobs agendados:
+2026-06-02 12:35:15 [INFO]   - Relatorios diarios (ter-dom)
+2026-06-02 12:35:15 [INFO]   - Segunda-feira: diario + mensal + semanal
+2026-06-02 12:35:15 [INFO] Added job "Relatorios diarios (ter-dom)" to job store "default"
+2026-06-02 12:35:15 [INFO] Added job "Segunda-feira: diario + mensal + semanal" to job store "default"
+2026-06-02 12:35:15 [INFO] Scheduler started
+2026-06-03 17:40:49 [INFO] Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-03 17:40:49 [INFO] Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-03 17:40:49 [INFO] Scheduler configurado — aguardando inicio...
+2026-06-03 17:40:49 [INFO] Jobs agendados:
+2026-06-03 17:40:49 [INFO]   - Relatorios diarios (ter-dom)
+2026-06-03 17:40:49 [INFO]   - Segunda-feira: diario + mensal + semanal
+2026-06-03 17:40:49 [INFO] Added job "Relatorios diarios (ter-dom)" to job store "default"
+2026-06-03 17:40:49 [INFO] Added job "Segunda-feira: diario + mensal + semanal" to job store "default"
+2026-06-03 17:40:49 [INFO] Scheduler started
+2026-06-03 17:46:39 [INFO] Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-03 17:46:39 [INFO] Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-03 17:46:39 [INFO] Scheduler configurado — aguardando inicio...
+2026-06-03 17:46:39 [INFO] Jobs agendados:
+2026-06-03 17:46:39 [INFO]   - Relatorios diarios (ter-dom)
+2026-06-03 17:46:39 [INFO]   - Segunda-feira: diario + mensal + semanal
+2026-06-03 17:46:39 [INFO] Added job "Relatorios diarios (ter-dom)" to job store "default"
+2026-06-03 17:46:39 [INFO] Added job "Segunda-feira: diario + mensal + semanal" to job store "default"
+2026-06-03 17:46:39 [INFO] Scheduler started
+Traceback (most recent call last):
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/main.py", line 40, in <module>
+    gads     = GoogleAdsDirectClient()
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/src/google_ads_client.py", line 21, in __init__
+    self._client  = GoogleAdsClient.load_from_storage(YAML_PATH)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/google/ads/googleads/client.py", line 321, in load_from_storage
+    kwargs: Dict[str, Any] = cls._get_client_kwargs(config_data)
+                             ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/google/ads/googleads/client.py", line 198, in _get_client_kwargs
+    "credentials": oauth2.get_credentials(config_data),
+                   ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/google/ads/googleads/oauth2.py", line 151, in get_credentials
+    return get_installed_app_credentials(
+        config_data.get("client_id"),
+    ...<2 lines>...
+        http_proxy=config_data.get("http_proxy"),
+    )
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/google/ads/googleads/oauth2.py", line 56, in initialize_credentials_wrapper
+    credentials.refresh(Request())
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/google/auth/credentials.py", line 482, in refresh
+    self._perform_refresh_token(request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/google/oauth2/credentials.py", line 435, in _perform_refresh_token
+    ) = reauth.refresh_grant(
+        ~~~~~~~~~~~~~~~~~~~~^
+        request,
+        ^^^^^^^^
+    ...<6 lines>...
+        enable_reauth_refresh=self._enable_reauth_refresh,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/google/oauth2/reauth.py", line 370, in refresh_grant
+    _client._handle_error_response(response_data, retryable_error)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/google/oauth2/_client.py", line 73, in _handle_error_response
+    raise exceptions.RefreshError(
+        error_details, response_data, retryable=retryable_error
+    )
+google.auth.exceptions.RefreshError: ('deleted_client: The OAuth client was deleted.', {'error': 'deleted_client', 'error_description': 'The OAuth client was deleted.'})
+2026-06-05 11:55:31 [INFO] Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-05 11:55:31 [INFO] Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-05 11:55:31 [INFO] Scheduler configurado — aguardando inicio...
+2026-06-05 11:55:31 [INFO] Jobs agendados:
+2026-06-05 11:55:31 [INFO]   - Relatorios diarios (ter-dom) — 11h50
+2026-06-05 11:55:31 [INFO]   - Segunda-feira: diario + mensal + semanal — 11h50
+2026-06-05 11:55:31 [INFO] Added job "Relatorios diarios (ter-dom) — 11h50" to job store "default"
+2026-06-05 11:55:31 [INFO] Added job "Segunda-feira: diario + mensal + semanal — 11h50" to job store "default"
+2026-06-05 11:55:31 [INFO] Scheduler started
+2026-06-08 02:34:07 [WARNING] Run time of job "Relatorios diarios (ter-dom) — 11h50 (trigger: cron[day_of_week='tue,wed,thu,fri,sat,sun', hour='11', minute='50'], next run at: 2026-06-06 11:50:00 -03)" was missed by 14:44:07.040173
+2026-06-08 13:37:26 [INFO] Running job "Segunda-feira: diario + mensal + semanal — 11h50 (trigger: cron[day_of_week='mon', hour='11', minute='50'], next run at: 2026-06-15 11:50:00 -03)" (scheduled at 2026-06-08 11:50:00-03:00)
+2026-06-08 13:37:26 [INFO] [reportei-daily] Iniciando analise para 2026-06-08
+2026-06-08 13:37:39 [INFO] [reportei-daily] HTML gerado: /Users/seunovomacbook/code/python-learning/reports-automation/data/reports/reportei_daily_2026-06-08.html

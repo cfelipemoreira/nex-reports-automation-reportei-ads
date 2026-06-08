@@ -80,3 +80,6 @@ google.auth.exceptions.RefreshError: ('deleted_client: The OAuth client was dele
 2026-06-08 13:37:26 [INFO] Running job "Segunda-feira: diario + mensal + semanal — 11h50 (trigger: cron[day_of_week='mon', hour='11', minute='50'], next run at: 2026-06-15 11:50:00 -03)" (scheduled at 2026-06-08 11:50:00-03:00)
 2026-06-08 13:37:26 [INFO] [reportei-daily] Iniciando analise para 2026-06-08
 2026-06-08 13:37:39 [INFO] [reportei-daily] HTML gerado: /Users/seunovomacbook/code/python-learning/reports-automation/data/reports/reportei_daily_2026-06-08.html
+2026-06-08 13:37:46 [INFO] [reportei-daily] Concluido.
+2026-06-08 13:37:46 [INFO] [reportei-monthly] Iniciando relatorio mensal para 2026-06-08
+2026-06-08 13:37:54 [INFO] [reportei-monthly] HTML gerado: /Users/seunovomacbook/code/python-learning/reports-automation/data/reports/reportei_monthly_2026-06-08.html

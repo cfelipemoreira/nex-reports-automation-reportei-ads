@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relatorio Mensal de Performance</title>
+  <style>
+    /* ── Reset & base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #1a1a2e;
+      background: #f0f2f5;
+    }
+
+    /* ── Page wrapper ── */
+    .page {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 32px 16px 64px;
+    }
+
+    /* ── Report header ── */
+    .report-header {
+      background: #1a1a2e;
+      border-radius: 12px 12px 0 0;
+      padding: 32px 36px;
+      color: #fff;
+      margin-bottom: 0;
+    }
+    .report-header .report-type-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: 8px;
+    }
+    .report-header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      line-height: 1.2;
+    }
+    .report-meta {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+    .meta-pill {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.85);
+    }
+    .meta-pill strong { color: #fff; }
+    .report-generated {
+      margin-top: 14px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.4);
+    }
+
+    /* ── Executive Summary ── */
+    .exec-summary {
+      background: #fff;
+      border-left: 5px solid #1a1a2e;
+      border-radius: 0 0 0 0;
+      padding: 28px 32px;
+      margin-bottom: 2px;
+    }
+    .exec-summary-header {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #1a1a2e;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e8e8f0;
+    }
+    .exec-highlights-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #5f6368;
+      margin-bottom: 10px;
+    }
+    .exec-highlights ul, .summary-col ul {
+      list-style: none;
+      padding: 0;
+    }
+    .exec-highlights li {
+      padding: 6px 0 6px 16px;
+      position: relative;
+      color: #3c3c4e;
+      font-size: 13px;
+      border-bottom: 1px solid #f0f0f5;
+    }
+    .exec-highlights li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #1a1a2e;
+    }
+    .exec-highlights li:last-child { border-bottom: none; }
+
+    .summary-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 20px;
+    }
+    @media (max-width: 600px) {
+      .summary-cols { grid-template-columns: 1fr; }
+    }
+    .summary-col {
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .summary-positive { background: #f0faf4; border: 1px solid #c3e6cb; }
+    .summary-negative { background: #fff5f5; border: 1px solid #f5c6cb; }
+    .summary-col-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .summary-positive .summary-col-title { color: #1a7a3c; }
+    .summary-negative .summary-col-title { color: #c0392b; }
+    .summary-col li {
+      padding: 5px 0 5px 14px;
+      position: relative;
+      font-size: 12px;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    .summary-col li:last-child { border-bottom: none; }
+    .summary-positive li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #28a745;
+    }
+    .summary-negative li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #dc3545;
+    }
+
+    /* ── Platform cards ── */
+    .platform-card {
+      background: #fff;
+      border-radius: 0;
+      border-left: 5px solid var(--platform-color, #4285F4);
+      margin-bottom: 2px;
+      overflow: hidden;
+    }
+    .platform-card:last-child {
+      border-radius: 0 0 12px 12px;
+      margin-bottom: 0;
+    }
+    .exec-summary:first-of-type + .platform-card,
+    .platform-card:first-of-type {
+      margin-top: 0;
+    }
+
+    .platform-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 20px 32px;
+      background: #fafafa;
+      border-bottom: 1px solid #e8e8f0;
+    }
+    .platform-icon {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--platform-color);
+      flex-shrink: 0;
+    }
+    .platform-icon svg {
+      width: 22px;
+      height: 22px;
+      fill: var(--platform-color);
+    }
+    .platform-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+
+    .platform-body {
+      padding: 24px 32px;
+    }
+
+    /* ── Metric boxes ── */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .metric-box {
+      background: #f8f9fc;
+      border: 1px solid #e8e8f0;
+      border-radius: 8px;
+      padding: 14px 16px;
+      position: relative;
+    }
+    .metric-box--anomaly {
+      border-color: #f0ad4e;
+      background: #fffbf0;
+    }
+    .anomaly-dot {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 18px;
+      height: 18px;
+      background: #f0ad4e;
+      color: #fff;
+      border-radius: 50%;
+      font-size: 11px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+    .metric-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #6b6b80;
+      margin-bottom: 8px;
+    }
+    .metric-current {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 8px;
+      line-height: 1;
+    }
+    .metric-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+    .metric-prev {
+      font-size: 11px;
+      color: #9b9bae;
+    }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .badge-positive { background: #e6f4ea; color: #1a7a3c; }
+    .badge-negative { background: #fce8e6; color: #c0392b; }
+    .badge-flat      { background: #f1f3f4; color: #6b6b80; }
+    .badge-neutral   { background: #e8f0fe; color: #1967d2; }
+
+    /* ── Section blocks ── */
+    .section-block {
+      margin-bottom: 16px;
+      border-radius: 8px;
+      padding: 14px 18px;
+    }
+    .section-block:last-child { margin-bottom: 0; }
+    .section-block-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .section-icon {
+      font-size: 12px;
+      line-height: 1;
+    }
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .section-block ul {
+      list-style: none;
+      padding: 0;
+    }
+    .section-block li {
+      padding: 5px 0 5px 14px;
+      position: relative;
+      font-size: 13px;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .section-block li:last-child { border-bottom: none; }
+    .section-block li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+    }
+
+    /* Block themes */
+    .block-highlight {
+      background: #f5f5ff;
+      border: 1px solid #ddd8ff;
+    }
+    .block-highlight .section-title { color: #5040c0; }
+    .block-highlight .section-icon { color: #5040c0; }
+    .block-highlight li::before { background: #7b68ee; }
+
+    .block-anomaly {
+      background: #fffbf0;
+      border: 1px solid #fde68a;
+    }
+    .block-anomaly .section-title { color: #b45309; }
+    .block-anomaly .section-icon { color: #d97706; }
+    .block-anomaly li::before { background: #f59e0b; }
+    .block-anomaly li { color: #78350f; }
+
+    .block-positive {
+      background: #f0faf4;
+      border: 1px solid #c3e6cb;
+    }
+    .block-positive .section-title { color: #1a7a3c; }
+    .block-positive .section-icon { color: #28a745; }
+    .block-positive li::before { background: #28a745; }
+    .block-positive li { color: #155724; }
+
+    .block-negative {
+      background: #fff5f5;
+      border: 1px solid #f5c6cb;
+    }
+    .block-negative .section-title { color: #c0392b; }
+    .block-negative .section-icon { color: #dc3545; }
+    .block-negative li::before { background: #dc3545; }
+    .block-negative li { color: #721c24; }
+
+    .block-insight {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+    }
+    .block-insight .section-title { color: #1967d2; }
+    .block-insight .section-icon { color: #3b82f6; }
+    .block-insight li::before { background: #3b82f6; }
+    .block-insight li { color: #1e40af; }
+
+    .block-action {
+      background: #f5f3ff;
+      border: 1px solid #ddd6fe;
+    }
+    .block-action .section-title { color: #6d28d9; }
+    .block-action .section-icon { color: #7c3aed; }
+    .block-action li::before { background: #8b5cf6; }
+    .block-action li { color: #4c1d95; }
+
+    /* ── Footer ── */
+    .report-footer {
+      margin-top: 32px;
+      text-align: center;
+      color: #9b9bae;
+      font-size: 11px;
+      padding: 0 16px;
+    }
+    .report-footer strong { color: #6b6b80; }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <!-- Header -->
+    <div class="report-header">
+      <div class="report-type-label">Relatorio Mensal</div>
+      <h1>Relatorio Mensal de Performance</h1>
+      <div class="report-meta">
+        <span class="meta-pill"><strong>Periodo:</strong> 01/06/2026 a 08/06/2026</span>
+        <span class="meta-pill"><strong>Comparacao:</strong> 01/05/2026 a 08/05/2026</span>
+      </div>
+      <div class="report-generated">Gerado em 08/06/2026 13:37</div>
+    </div>
+
+    <!-- Executive Summary -->
+    
+    <div class="exec-summary">
+      <div class="exec-summary-header">Resumo Executivo</div>
+      <div class="exec-highlights">
+        <div class="exec-highlights-title">Destaques do Periodo</div>
+        <ul>
+          <li>[Google Analytics 4] 1,697 sessoes no periodo analisado</li>
+          <li>[Google Analytics 4] 81.1% dos usuarios sao novos (1,183 de 1,458)</li>
+          <li>[Facebook Ads] Investimento de R$ 238.29 no periodo</li>
+          <li>[Facebook Ads] Alcance de 23,694 pessoas</li>
+          <li>[Google Ads] Investimento de R$ 3,190.92 no periodo</li>
+        </ul>
+      </div>
+      <div class="summary-cols">
+        
+          <div class="summary-col summary-positive">
+            <div class="summary-col-title">&#9650; Principais Altas</div>
+            <ul>          <li>[Google Analytics 4] Pageviews cresceu +1.6% (3.3K → 3.4K)</li>
+          <li>[Facebook Ads] CTR subiu +6.4% (1.75% → 1.86%)</li>
+          <li>[Google Ads] CPC medio caiu 37.0% — cliques mais baratos</li>
+          <li>[Search Console] CTR Organico subiu +30.9% (1.61% → 2.10%)</li></ul>
+          </div>
+        
+          <div class="summary-col summary-negative">
+            <div class="summary-col-title">&#9660; Principais Baixas</div>
+            <ul>          <li>[Google Analytics 4] Sessoes caiu -21.4% (2.2K → 1.7K)</li>
+          <li>[Google Analytics 4] Usuarios caiu -17.6% (1.8K → 1.5K)</li>
+          <li>[Facebook Ads] Impressoes caiu -45.3% (54.6K → 29.8K)</li>
+          <li>[Facebook Ads] Cliques caiu -41.8% (956 → 556)</li></ul>
+          </div>
+      </div>
+    </div>
+
+    <!-- Platform sections -->
+    
+    <div class="platform-card" style="--platform-color: #4285F4;">
+      <div class="platform-header">
+        <span class="platform-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M22.84 2.998C21.616 1.702 19.864 1 18 1c-1.864 0-3.616.702-4.84 1.998L12 4.201l-1.16-1.203C9.616 1.702 7.864 1 6 1 4.136 1 2.384 1.702 1.16 2.998 0 4.228 0 6.001 0 7c0 5.005 5.824 9.98 10.814 13.496L12 21.4l1.186-.904C18.176 16.98 24 12.005 24 7c0-.999 0-2.772-1.16-4.002z"/></svg></span>
+        <span class="platform-name">Google Analytics 4 — Trafego</span>
+      </div>
+      <div class="platform-body">
+        <div class="metrics-grid">
+      <div class="metric-box metric-box--anomaly">
+        <span class="anomaly-dot" title="Anomalia detectada">!</span>
+        <div class="metric-label">Sessoes</div>
+        <div class="metric-current">1.7K</div>
+        <div class="metric-footer">
+          <span class="metric-prev">ant: 2.2K</span>
+          <span class="badge badge-negative">&#9660; -21.4%</span>
+        </div>
+      </div>
+
+      <div class="metric-box">
+        
+        <div class="metric-label">Usuarios</div>
+        <div class="metric-current">1.5K</div>
+        <div class="metric-footer">
+          <span class="metric-prev">ant: 1.8K</span>
+          <span class="badge badge-negative">&#9660; -17.6%</span>
+        </div>
+      </div>
+
+      <div class="metric-box metric-box--anomaly">
+        <span class="anomaly-dot" title="Anomalia detectada">!</span>
+        <div class="metric-label">Novos Usuarios</div>
+        <div class="metric-current">1.2K</div>
+        <div class="metric-footer">
+          <span class="metric-prev">ant: 1.6K</span>
+          <span class="badge badge-negative">&#9660; -24.1%</span>
+        </div>
+      </div>
+
+      <div class="metric-box">
+        
+        <div class="metric-label">Pageviews</div>
+        <div class="metric-current">3.4K</div>
+        <div class="metric-footer">
+          <span class="metric-prev">ant: 3.3K</span>
+          <span class="badge badge-positive">&#9650; +1.6%</span>
+        </div>
+      </div>
+      </div>
+        
+      <div class="section-block block-highlight">
+        <div class="section-block-header">
+          <span class="section-icon">&#9670;</span>
+          <span class="section-title">Pontos de Destaque</span>
+        </div>
+        <ul>
+          <li>1,697 sessoes no periodo analisado</li>
+          <li>81.1% dos usuarios sao novos (1,183 de 1,458)</li>
+        </ul>
+      </div>
+      <div class="section-block block-anomaly">
+        <div class="section-block-header">
+          <span class="section-icon">&#9888;</span>
+          <span class="section-title">Anomalias</span>
+        </div>
+        <ul>
+          <li>Sessoes: -21.4% vs periodo anterior (2.2K → 1.7K)</li>
+          <li>Novos Usuarios: -24.1% vs periodo anterior (1.6K → 1.2K)</li>
+        </ul>
+      </div>
+      <div class="section-block block-positive">
+        <div class="section-block-header">
+          <span class="section-icon">&#9650;</span>
+          <span class="section-title">Pontos Positivos</span>
+        </div>
+        <ul>
+          <li>Pageviews cresceu +1.6% (3.3K → 3.4K)</li>
+        </ul>
+      </div>
+      <div class="section-block block-negative">
+        <div class="section-block-header">
+          <span class="section-icon">&#9660;</span>
+          <span class="section-title">Pontos Negativos</span>
+        </div>
+        <ul>
+          <li>Sessoes caiu -21.4% (2.2K → 1.7K)</li>
+          <li>Usuarios caiu -17.6% (1.8K → 1.5K)</li>
+          <li>Novos Usuarios caiu -24.1% (1.6K → 1.2K)</li>
+        </ul>
+      </div>
+      <div class="section-block block-insight">
+        <div class="section-block-header">
+          <span class="section-icon">&#9670;</span>
+          <span class="section-title">Insights</span>
+        </div>
+        <ul>
+          <li>Queda significativa de sessoes (-21.4%) — possivel impacto de campanhas pausadas ou sazonalidade.</li>
+        </ul>
+      </div>
+      <div class="section-block block-action">
+        <div class="section-block-header">
+          <span class="section-icon">&#9654;</span>
+          <span class="section-title">Acoes Propostas</span>
+        </div>
+        <ul>
+          <li>Verificar status das campanhas pagas e check de indexacao no Google Search Console.</li>
+          <li>Avaliar aumento de investimento em campanhas de aquisicao (topo de funil).</li>
+        </ul>
+      </div>
+      </div>
+    </div>
+
+    <div class="platform-card" style="--platform-color: #1877F2;">
+      <div class="platform-header">
+        <span class="platform-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.397 20.997v-8.196h2.765l.411-3.209h-3.176V7.548c0-.926.258-1.56 1.587-1.56h1.684V3.127A22.336 22.336 0 0 0 14.201 3c-2.444 0-4.122 1.492-4.122 4.231v2.355H7.332v3.209h2.753v8.202h3.312z"/></svg></span>
+        <span class="platform-name">Facebook Ads — NEX Curitiba</span>
+      </div>
+      <div class="platform-body">
+        <div class="metrics-grid">
+      <div class="metric-box metric-box--anomaly">
+        <span class="anomaly-dot" title="Anomalia detectada">!</span>
+        <div class="metric-label">Investimento</div>
+        <div class="metric-current">R$ 238.29</div>
+        <div class="metric-footer">
+          <span class="metric-prev">ant: R$ 315.40</span>
+          <span class="badge badge-neutral">&#9660; -24.4%</span>
+        </div>
+      </div>
+
+      <div class="metric-box metric-box--anomaly">
+        <span class="anomaly-dot" title="Anomalia detectada">!</span>
+        <div class="metric-label">Impressoes</div>
+        <div class="metric-current">29.8K</div>
+        <div class="metric-footer">
+          <span class="metric-prev">ant: 54.6K</span>
+          <span class="badge badge-negative">&#9660; -45.3%</span>
+        </div>
+      </div>
+
+      <div class="metric-box metric-box--anomaly">
+        <span class="anomaly-dot" title="Anomalia detectada">!</span>
+        <div class="metric-label">Cliques</div>
+        <div class="metric-current">556</div>
+        <div class="metric-footer">
+          <span class="metric-prev">ant: 956</span>
+          <span class="badge badge-negative">&#9660; -41.8%</span>
+        </div>
+      </div>
+
+      <div class="metric-box metric-box--anomaly">
+        <span class="anomaly-dot" title="Anomalia detectada">!</span>
+        <div class="metric-label">Alcance</div>
+        <div class="metric-current">23.7K</div>
+        <div class="metric-footer">
+          <span class="metric-prev">ant: 37.3K</span>
+          <span class="badge badge-negative">&#9660; -36.5%</span>
+        </div>
+      </div>
+
+      <div class="metric-box">
+        
+        <div class="metric-label">CTR</div>
+        <div class="metric-current">1.86%</div>
+        <div class="metric-footer">
+          <span class="metric-prev">ant: 1.75%</span>
+          <span class="badge badge-positive">&#9650; +6.4%</span>
+        </div>
+      </div>
+
+      <div class="metric-box metric-box--anomaly">
+        <span class="anomaly-dot" title="Anomalia detectada">!</span>
+        <div class="metric-label">CPM</div>
+        <div class="metric-current">R$ 7.99</div>
+        <div class="metric-footer">
+          <span class="metric-prev">ant: R$ 5.78</span>
+          <span class="badge badge-negative">&#9650; +38.2%</span>
+        </div>
+      </div>
+
+      <div class="metric-box metric-box--anomaly">
+        <span class="anomaly-dot" title="Anomalia detectada">!</span>
+        <div class="metric-label">CPC</div>
+        <div class="metric-current">R$ 0.43</div>
+        <div class="metric-footer">
+          <span class="metric-prev">ant: R$ 0.33</span>
+          <span class="badge badge-negative">&#9650; +29.9%</span>
+        </div>
+      </div>
+      </div>
+        
+      <div class="section-block block-highlight">
+        <div class="section-block-header">
+          <span class="section-icon">&#9670;</span>
+          <span class="section-title">Pontos de Destaque</span>
+        </div>
+        <ul>
+          <li>Investimento de R$ 238.29 no periodo</li>
+          <li>Alcance de 23,694 pessoas</li>
+          <li>CTR de 1.86%</li>
+        </ul>
+      </div>
+      <div class="section-block block-anomaly">
+        <div class="section-block-header">
+          <span class="section-icon">&#9888;</span>
+          <span class="section-title">Anomalias</span>
+        </div>
+        <ul>
+          <li>Investimento: -24.4% vs periodo anterior</li>
+          <li>Impressoes: -45.3% vs periodo anterior</li>
+          <li>Cliques: -41.8% vs periodo anterior</li>
+          <li>Alcance: -36.5% vs periodo anterior</li>
+          <li>CPM: +38.2% vs periodo anterior</li>
+          <li>CPC: +29.9% vs periodo anterior</li>
+        </ul>
+      </div>
+      <div class="section-block block-positive">
+        <div class="section-block-header">
+          <span class="section-icon">&#9650;</span>
+          <span class="section-title">Pontos Positivos</span>
+        </div>
+        <ul>
+          <li>CTR subiu +6.4% (1.75% → 1.86%)</li>
+        </ul>
+      </div>
+      <div class="section-block block-negative">
+        <div class="section-block-header">
+          <span class="section-icon">&#9660;</span>
+          <span class="section-title">Pontos Negativos</span>
+        </div>
+        <ul>
+          <li>Impressoes caiu -45.3% (54.6K → 29.8K)</li>
+          <li>Cliques caiu -41.8% (956 → 556)</li>
+          <li>Alcance caiu -36.5% (37.3K → 23.7K)</li>
+          <li>CPM subiu +38.2% (R$ 5.78 → R$ 7.99)</li>
+          <li>CPC subiu +29.9% (R$ 0.33 → R$ 0.43)</li>
+        </ul>
+      </div>
+      <div class="section-block block-insight">
+        <div class="section-block-header">
+          <span class="section-icon">&#9670;</span>
+          <span class="section-title">Insights</span>
+        </div>
+        <ul>
+          <li>CPM subiu 38.2% — mercado mais competitivo ou audience saturada.</li>
+        </ul>
+      </div>
+      <div class="section-block block-action">
+        <div class="section-block-header">
+          <span class="section-icon">&#9654;</span>
+          <span class="section-title">Acoes Propostas</span>
+        </div>
+        <ul>
+          <li>Testar novos publicos ou ampliar audience para reduzir CPM.</li>
+        </ul>
+      </div>
+      </div>
+    </div>
+
+    <div class="platform-card" style="--platform-color: #34A853;">
+      <div class="platform-header">
+        <span class="platform-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/></svg></span>
+        <span class="platform-name">Google Ads — NEX.WORK</span>
+      </div>
+      <div class="platform-body">
+        <div class="metrics-grid">
+      <div class="metric-box metric-box--anomaly">
+        <span class="anomaly-dot" title="Anomalia detectada">!</span>
+        <div class="metric-label">Impressoes</div>
+        <div class="metric-current">23.1K</div>
+        <div class="metric-footer">
+          <span class="metric-prev">ant: 32.9K</span>
+          <span class="badge badge-negative">&#9660; -29.7%</span>
+        </div>
+      </div>
+
+      <div class="metric-box">
+        
+        <div class="metric-label">Cliques</div>
+        <div class="metric-current">1.5K</div>
+        <div class="metric-footer">
+          <span class="metric-prev">ant: 1.7K</span>
+          <span class="badge badge-negative">&#9660; -11.7%</span>
+        </div>
+      </div>
+
+      <div class="metric-box metric-box--anomaly">
+        <span class="anomaly-dot" title="Anomalia detectada">!</span>
+        <div class="metric-label">Investimento</div>
+        <div class="metric-current">R$ 3,190.92</div>
+        <div class="metric-footer">
+          <span class="metric-prev">ant: R$ 5,738.43</span>
+          <span class="badge badge-neutral">&#9660; -44.4%</span>
+        </div>
+      </div>
+
+      <div class="metric-box metric-box--anomaly">
+        <span class="anomaly-dot" title="Anomalia detectada">!</span>
+        <div class="metric-label">Conversoes</div>
+        <div class="metric-current">140.99</div>
+        <div class="metric-footer">
+          <span class="metric-prev">ant: 189.51</span>
+          <span class="badge badge-negative">&#9660; -25.6%</span>
+        </div>
+      </div>
+
+      <div class="metric-box metric-box--anomaly">
+        <span class="anomaly-dot" title="Anomalia detectada">!</span>
+        <div class="metric-label">CTR</div>
+        <div class="metric-current">6.63%</div>
+        <div class="metric-footer">
+          <span class="metric-prev">ant: 5.28%</span>
+          <span class="badge badge-positive">&#9650; +25.5%</span>
+        </div>
+      </div>
+
+      <div class="metric-box metric-box--anomaly">
+        <span class="anomaly-dot" title="Anomalia detectada">!</span>
+        <div class="metric-label">CPC Medio</div>
+        <div class="metric-current">R$ 2.08</div>
+        <div class="metric-footer">
+          <span class="metric-prev">ant: R$ 3.30</span>
+          <span class="badge badge-positive">&#9660; -37.0%</span>
+        </div>
+      </div>
+
+      <div class="metric-box metric-box--anomaly">
+        <span class="anomaly-dot" title="Anomalia detectada">!</span>
+        <div class="metric-label">ROAS</div>
+        <div class="metric-current">0.00x</div>
+        <div class="metric-footer">
+          <span class="metric-prev">ant: 0.00x</span>
+          <span class="badge badge-negative">&#9660; -55.0%</span>
+        </div>
+      </div>
+
+      <div class="metric-box metric-box--anomaly">
+        <span class="anomaly-dot" title="Anomalia detectada">!</span>
+        <div class="metric-label">Custo/Conv</div>
+        <div class="metric-current">R$ 22.63</div>
+        <div class="metric-footer">
+          <span class="metric-prev">ant: R$ 30.28</span>
+          <span class="badge badge-positive">&#9660; -25.3%</span>
+        </div>
+      </div>
+      </div>
+        
+      <div class="section-block block-highlight">
+        <div class="section-block-header">
+          <span class="section-icon">&#9670;</span>
+          <span class="section-title">Pontos de Destaque</span>
+        </div>
+        <ul>
+          <li>Investimento de R$ 3,190.92 no periodo</li>
+          <li>141 conversoes registradas</li>
+          <li>Custo por conversao: R$ 22.63</li>
+        </ul>
+      </div>
+      <div class="section-block block-anomaly">
+        <div class="section-block-header">
+          <span class="section-icon">&#9888;</span>
+          <span class="section-title">Anomalias</span>
+        </div>
+        <ul>
+          <li>Impressoes: -29.7% vs periodo anterior (32.9K → 23.1K)</li>
+          <li>Conversoes: -25.6% vs periodo anterior (189.51 → 140.99)</li>
+          <li>CTR: +25.5% vs periodo anterior (5.28% → 6.63%)</li>
+          <li>CPC Medio: -37.0% vs periodo anterior (R$ 3.30 → R$ 2.08)</li>
+          <li>ROAS: -55.0% vs periodo anterior (0.00x → 0.00x)</li>
+          <li>Custo/Conv: -25.3% vs periodo anterior (R$ 30.28 → R$ 22.63)</li>
+        </ul>
+      </div>
+      <div class="section-block block-positive">
+        <div class="section-block-header">
+          <span class="section-icon">&#9650;</span>
+          <span class="section-title">Pontos Positivos</span>
+        </div>
+        <ul>
+          <li>CPC medio caiu 37.0% — cliques mais baratos</li>
+        </ul>
+      </div>
+      <div class="section-block block-negative">
+        <div class="section-block-header">
+          <span class="section-icon">&#9660;</span>
+          <span class="section-title">Pontos Negativos</span>
+        </div>
+        <ul>
+          <li>ROAS 0.00x — campanha no prejuizo em termos de receita direta</li>
+        </ul>
+      </div>
+      <div class="section-block block-insight">
+        <div class="section-block-header">
+          <span class="section-icon">&#9670;</span>
+          <span class="section-title">Insights</span>
+        </div>
+        <ul>
+          <li>ROAS de 0.00x — abaixo de 1, campanha custando mais do que retorna.</li>
+        </ul>
+      </div>
+      <div class="section-block block-action">
+        <div class="section-block-header">
+          <span class="section-icon">&#9654;</span>
+          <span class="section-title">Acoes Propostas</span>
+        </div>
+        <ul>
+          <li>Auditar campanhas com ROAS < 1 e pausar grupos de anuncios ineficientes.</li>
+          <li>Checar tracking de conversoes e revisar landing pages para melhorar taxa de conversao.</li>
+        </ul>
+      </div>
+      </div>
+    </div>
+
+    <div class="platform-card" style="--platform-color: #EA4335;">
+      <div class="platform-header">
+        <span class="platform-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg></span>
+        <span class="platform-name">Search Console — nex.work (SEO)</span>
+      </div>
+      <div class="platform-body">
+        <div class="metrics-grid">
+      <div class="metric-box">
+        
+        <div class="metric-label">Cliques Org.</div>
+        <div class="metric-current">212</div>
+        <div class="metric-footer">
+          <span class="metric-prev">ant: 231</span>
+          <span class="badge badge-negative">&#9660; -8.2%</span>
+        </div>
+      </div>
+
+      <div class="metric-box metric-box--anomaly">
+        <span class="anomaly-dot" title="Anomalia detectada">!</span>
+        <div class="metric-label">Impressoes Org.</div>
+        <div class="metric-current">10.1K</div>
+        <div class="metric-footer">
+          <span class="metric-prev">ant: 14.4K</span>
+          <span class="badge badge-negative">&#9660; -29.9%</span>
+        </div>
+      </div>
+
+      <div class="metric-box metric-box--anomaly">
+        <span class="anomaly-dot" title="Anomalia detectada">!</span>
+        <div class="metric-label">CTR Organico</div>
+        <div class="metric-current">2.10%</div>
+        <div class="metric-footer">
+          <span class="metric-prev">ant: 1.61%</span>
+          <span class="badge badge-positive">&#9650; +30.9%</span>
+        </div>
+      </div>
+      </div>
+        
+      <div class="section-block block-highlight">
+        <div class="section-block-header">
+          <span class="section-icon">&#9670;</span>
+          <span class="section-title">Pontos de Destaque</span>
+        </div>
+        <ul>
+          <li>212 cliques organicos no periodo</li>
+          <li>10,074 impressoes na busca organica</li>
+          <li>CTR organico de 2.10%</li>
+        </ul>
+      </div>
+      <div class="section-block block-anomaly">
+        <div class="section-block-header">
+          <span class="section-icon">&#9888;</span>
+          <span class="section-title">Anomalias</span>
+        </div>
+        <ul>
+          <li>Impressoes Org.: -29.9% vs periodo anterior</li>
+          <li>CTR Organico: +30.9% vs periodo anterior</li>
+        </ul>
+      </div>
+      <div class="section-block block-positive">
+        <div class="section-block-header">
+          <span class="section-icon">&#9650;</span>
+          <span class="section-title">Pontos Positivos</span>
+        </div>
+        <ul>
+          <li>CTR Organico subiu +30.9% (1.61% → 2.10%)</li>
+        </ul>
+      </div>
+      <div class="section-block block-negative">
+        <div class="section-block-header">
+          <span class="section-icon">&#9660;</span>
+          <span class="section-title">Pontos Negativos</span>
+        </div>
+        <ul>
+          <li>Cliques Org. caiu -8.2% (231 → 212)</li>
+          <li>Impressoes Org. caiu -29.9% (14.4K → 10.1K)</li>
+        </ul>
+      </div>
+      <div class="section-block block-action">
+        <div class="section-block-header">
+          <span class="section-icon">&#9654;</span>
+          <span class="section-title">Acoes Propostas</span>
+        </div>
+        <ul>
+          <li>Continuar producao de conteudo e monitorar posicoes das principais palavras-chave.</li>
+        </ul>
+      </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="report-footer">
+      <strong>NEX Coworking</strong> &bull; Relatorio automatico gerado pelo sistema de monitoramento &bull; 08/06/2026 13:37
+    </div>
+
+  </div>
+</body>
+</html>

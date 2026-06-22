@@ -322,3 +322,100 @@ google.auth.exceptions.RefreshError: ('deleted_client: The OAuth client was dele
 2026-06-22 12:03:25 [INFO] [reportei-daily] Iniciando analise para 2026-06-22
 2026-06-22 12:03:41 [INFO] [reportei-daily] HTML gerado: /Users/seunovomacbook/code/python-learning/reports-automation/data/reports/reportei_daily_2026-06-22.html
 Python(71381) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+Python(71383) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+Python(71384) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+Python(71385) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+Python(71386) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+2026-06-22 12:03:51 [INFO] [reportei-daily] Concluido.
+2026-06-22 12:03:51 [INFO] [reportei-monthly] Iniciando relatorio mensal para 2026-06-22
+2026-06-22 12:04:27 [ERROR] [reportei-monthly] Erro: HTTPSConnectionPool(host='app.reportei.com', port=443): Read timed out. (read timeout=30)
+Traceback (most recent call last):
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/urllib3/connectionpool.py", line 534, in _make_request
+    response = conn.getresponse()
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/urllib3/connection.py", line 571, in getresponse
+    httplib_response = super().getresponse()
+  File "/opt/homebrew/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/http/client.py", line 1450, in getresponse
+    response.begin()
+    ~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/http/client.py", line 336, in begin
+    version, status, reason = self._read_status()
+                              ~~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/http/client.py", line 297, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/socket.py", line 725, in readinto
+    return self._sock.recv_into(b)
+           ~~~~~~~~~~~~~~~~~~~~^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/ssl.py", line 1304, in recv_into
+    return self.read(nbytes, buffer)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/ssl.py", line 1138, in read
+    return self._sslobj.read(len, buffer)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+TimeoutError: The read operation timed out
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/requests/adapters.py", line 696, in send
+    resp = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        chunked=chunked,
+    )
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/urllib3/connectionpool.py", line 842, in urlopen
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/urllib3/util/retry.py", line 498, in increment
+    raise reraise(type(error), error, _stacktrace)
+          ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/urllib3/util/util.py", line 39, in reraise
+    raise value
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/urllib3/connectionpool.py", line 788, in urlopen
+    response = self._make_request(
+        conn,
+    ...<10 lines>...
+        **response_kw,
+    )
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/urllib3/connectionpool.py", line 536, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/urllib3/connectionpool.py", line 367, in _raise_timeout
+    raise ReadTimeoutError(
+        self, url, f"Read timed out. (read timeout={timeout_value})"
+    ) from err
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='app.reportei.com', port=443): Read timed out. (read timeout=30)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/main.py", line 79, in job_reportei_monthly
+    raw      = reportei.fetch_monthly_period_data(today)
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/src/reportei_client.py", line 232, in fetch_monthly_period_data
+    data = self.get_metrics(int_id, current_start, current_end, metrics,
+                            comparison_start=comparison_start,
+                            comparison_end=comparison_end)
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/src/reportei_client.py", line 155, in get_metrics
+    raw = self._post("/metrics/get-data", payload)
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/src/reportei_client.py", line 121, in _post
+    resp = requests.post(
+        f"{self.base_url}{path}",
+    ...<2 lines>...
+        timeout=30,
+    )
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/requests/api.py", line 134, in post
+    return request("post", url, data=data, json=json, **kwargs)
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/requests/api.py", line 71, in request
+    return session.request(method=method, url=url, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/requests/sessions.py", line 651, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/requests/sessions.py", line 784, in send
+    r = adapter.send(request, **kwargs)
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/requests/adapters.py", line 742, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='app.reportei.com', port=443): Read timed out. (read timeout=30)
+2026-06-22 12:04:27 [INFO] [reportei-weekly] Iniciando relatorio semanal para 2026-06-22
+2026-06-22 12:04:39 [INFO] [reportei-weekly] HTML gerado: /Users/seunovomacbook/code/python-learning/reports-automation/data/reports/reportei_weekly_2026-06-22.html
+Python(71408) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.

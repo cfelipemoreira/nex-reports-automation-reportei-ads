@@ -419,3 +419,59 @@ requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='app.reportei.com', po
 2026-06-22 12:04:27 [INFO] [reportei-weekly] Iniciando relatorio semanal para 2026-06-22
 2026-06-22 12:04:39 [INFO] [reportei-weekly] HTML gerado: /Users/seunovomacbook/code/python-learning/reports-automation/data/reports/reportei_weekly_2026-06-22.html
 Python(71408) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+Python(71409) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+Python(71410) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+Python(71411) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+Python(71412) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+2026-06-22 12:04:48 [INFO] [reportei-weekly] Concluido.
+2026-06-22 12:04:48 [INFO] [gads] Iniciando relatorio completo Google Ads para 2026-06-22
+2026-06-22 12:04:48 [ERROR] [gads] Erro: ('deleted_client: The OAuth client was deleted.', {'error': 'deleted_client', 'error_description': 'The OAuth client was deleted.'})
+Traceback (most recent call last):
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/main.py", line 128, in job_gads
+    gads = _get_gads()
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/main.py", line 48, in _get_gads
+    _gads_client = GoogleAdsDirectClient()
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/src/google_ads_client.py", line 21, in __init__
+    self._client  = GoogleAdsClient.load_from_storage(YAML_PATH)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/google/ads/googleads/client.py", line 321, in load_from_storage
+    kwargs: Dict[str, Any] = cls._get_client_kwargs(config_data)
+                             ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/google/ads/googleads/client.py", line 198, in _get_client_kwargs
+    "credentials": oauth2.get_credentials(config_data),
+                   ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/google/ads/googleads/oauth2.py", line 151, in get_credentials
+    return get_installed_app_credentials(
+        config_data.get("client_id"),
+    ...<2 lines>...
+        http_proxy=config_data.get("http_proxy"),
+    )
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/google/ads/googleads/oauth2.py", line 56, in initialize_credentials_wrapper
+    credentials.refresh(Request())
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/google/auth/credentials.py", line 482, in refresh
+    self._perform_refresh_token(request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/google/oauth2/credentials.py", line 435, in _perform_refresh_token
+    ) = reauth.refresh_grant(
+        ~~~~~~~~~~~~~~~~~~~~^
+        request,
+        ^^^^^^^^
+    ...<6 lines>...
+        enable_reauth_refresh=self._enable_reauth_refresh,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/google/oauth2/reauth.py", line 370, in refresh_grant
+    _client._handle_error_response(response_data, retryable_error)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/google/oauth2/_client.py", line 73, in _handle_error_response
+    raise exceptions.RefreshError(
+        error_details, response_data, retryable=retryable_error
+    )
+google.auth.exceptions.RefreshError: ('deleted_client: The OAuth client was deleted.', {'error': 'deleted_client', 'error_description': 'The OAuth client was deleted.'})
+2026-06-22 12:04:48 [INFO] Job "Segunda-feira: diario + mensal + semanal — 11h50 (trigger: cron[day_of_week='mon', hour='11', minute='50'], next run at: 2026-06-29 11:50:00 -03)" executed successfully
+2026-06-24 15:20:32 [INFO] Running job "Relatorios diarios (ter-dom) — 11h50 (trigger: cron[day_of_week='tue,wed,thu,fri,sat,sun', hour='11', minute='50'], next run at: 2026-06-25 11:50:00 -03)" (scheduled at 2026-06-24 11:50:00-03:00)
+2026-06-24 15:20:32 [INFO] [reportei-daily] Iniciando analise para 2026-06-24
+2026-06-24 15:21:18 [INFO] [reportei-daily] HTML gerado: /Users/seunovomacbook/code/python-learning/reports-automation/data/reports/reportei_daily_2026-06-24.html
+Python(1100) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.

@@ -714,3 +714,11 @@ Python(73711) MallocStackLogging: can't turn off malloc stack logging because it
 2026-07-06 15:36:30 [INFO] [reportei-monthly] Iniciando relatorio mensal para 2026-07-06
 2026-07-06 15:36:37 [INFO] [reportei-monthly] HTML gerado: /Users/seunovomacbook/code/python-learning/reports-automation/data/reports/reportei_monthly_2026-07-06.html
 Python(73720) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+Python(73721) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+Python(73722) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+Python(73723) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+Python(73724) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+2026-07-06 15:36:44 [INFO] [reportei-monthly] Concluido.
+2026-07-06 15:36:44 [INFO] [reportei-weekly] Iniciando relatorio semanal para 2026-07-06
+2026-07-06 15:36:49 [INFO] [reportei-weekly] HTML gerado: /Users/seunovomacbook/code/python-learning/reports-automation/data/reports/reportei_weekly_2026-07-06.html
+Python(73732) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.

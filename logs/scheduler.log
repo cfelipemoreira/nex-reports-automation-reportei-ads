@@ -948,3 +948,6 @@ google.auth.exceptions.RefreshError: ('deleted_client: The OAuth client was dele
 2026-07-13 11:50:21 [INFO] [reportei-daily] Concluido.
 2026-07-13 11:50:21 [INFO] [reportei-monthly] Iniciando relatorio mensal para 2026-07-13
 2026-07-13 11:50:30 [INFO] [reportei-monthly] HTML gerado: /Users/seunovomacbook/code/python-learning/reports-automation/data/reports/reportei_monthly_2026-07-13.html
+2026-07-13 11:50:37 [INFO] [reportei-monthly] Concluido.
+2026-07-13 11:50:37 [INFO] [reportei-weekly] Iniciando relatorio semanal para 2026-07-13
+2026-07-13 11:50:49 [INFO] [reportei-weekly] HTML gerado: /Users/seunovomacbook/code/python-learning/reports-automation/data/reports/reportei_weekly_2026-07-13.html

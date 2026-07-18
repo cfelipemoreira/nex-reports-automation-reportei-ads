@@ -1003,3 +1003,54 @@ google.auth.exceptions.RefreshError: ('deleted_client: The OAuth client was dele
 2026-07-16 14:52:44 [INFO] Running job "Relatorios diarios (ter-dom) — 11h50 (trigger: cron[day_of_week='tue,wed,thu,fri,sat,sun', hour='11', minute='50'], next run at: 2026-07-17 11:50:00 -03)" (scheduled at 2026-07-16 11:50:00-03:00)
 2026-07-16 14:52:44 [INFO] [reportei-daily] Iniciando analise para 2026-07-16
 2026-07-16 14:52:59 [INFO] [reportei-daily] HTML gerado: /Users/seunovomacbook/code/python-learning/reports-automation/data/reports/reportei_daily_2026-07-16.html
+2026-07-16 14:53:06 [INFO] [reportei-daily] Concluido.
+2026-07-16 14:53:06 [INFO] [gads] Iniciando relatorio completo Google Ads para 2026-07-16
+2026-07-16 14:53:07 [ERROR] [gads] Erro: ('deleted_client: The OAuth client was deleted.', {'error': 'deleted_client', 'error_description': 'The OAuth client was deleted.'})
+Traceback (most recent call last):
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/main.py", line 128, in job_gads
+    gads = _get_gads()
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/main.py", line 48, in _get_gads
+    _gads_client = GoogleAdsDirectClient()
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/src/google_ads_client.py", line 21, in __init__
+    self._client  = GoogleAdsClient.load_from_storage(YAML_PATH)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/google/ads/googleads/client.py", line 321, in load_from_storage
+    kwargs: Dict[str, Any] = cls._get_client_kwargs(config_data)
+                             ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/google/ads/googleads/client.py", line 198, in _get_client_kwargs
+    "credentials": oauth2.get_credentials(config_data),
+                   ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/google/ads/googleads/oauth2.py", line 151, in get_credentials
+    return get_installed_app_credentials(
+        config_data.get("client_id"),
+    ...<2 lines>...
+        http_proxy=config_data.get("http_proxy"),
+    )
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/google/ads/googleads/oauth2.py", line 56, in initialize_credentials_wrapper
+    credentials.refresh(Request())
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/google/auth/credentials.py", line 482, in refresh
+    self._perform_refresh_token(request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/google/oauth2/credentials.py", line 435, in _perform_refresh_token
+    ) = reauth.refresh_grant(
+        ~~~~~~~~~~~~~~~~~~~~^
+        request,
+        ^^^^^^^^
+    ...<6 lines>...
+        enable_reauth_refresh=self._enable_reauth_refresh,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/google/oauth2/reauth.py", line 370, in refresh_grant
+    _client._handle_error_response(response_data, retryable_error)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/seunovomacbook/code/python-learning/reports-automation/.venv/lib/python3.14/site-packages/google/oauth2/_client.py", line 73, in _handle_error_response
+    raise exceptions.RefreshError(
+        error_details, response_data, retryable=retryable_error
+    )
+google.auth.exceptions.RefreshError: ('deleted_client: The OAuth client was deleted.', {'error': 'deleted_client', 'error_description': 'The OAuth client was deleted.'})
+2026-07-16 14:53:07 [INFO] Job "Relatorios diarios (ter-dom) — 11h50 (trigger: cron[day_of_week='tue,wed,thu,fri,sat,sun', hour='11', minute='50'], next run at: 2026-07-17 11:50:00 -03)" executed successfully
+2026-07-18 11:56:29 [INFO] Running job "Relatorios diarios (ter-dom) — 11h50 (trigger: cron[day_of_week='tue,wed,thu,fri,sat,sun', hour='11', minute='50'], next run at: 2026-07-19 11:50:00 -03)" (scheduled at 2026-07-18 11:50:00-03:00)
+2026-07-18 11:56:29 [INFO] [reportei-daily] Iniciando analise para 2026-07-18
+2026-07-18 11:56:44 [INFO] [reportei-daily] HTML gerado: /Users/seunovomacbook/code/python-learning/reports-automation/data/reports/reportei_daily_2026-07-18.html

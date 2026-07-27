@@ -1277,3 +1277,11 @@ google.auth.exceptions.RefreshError: ('deleted_client: The OAuth client was dele
 2026-07-27 14:00:29 [INFO] [reportei-daily] Iniciando analise para 2026-07-27
 2026-07-27 14:00:45 [INFO] [reportei-daily] HTML gerado: /Users/seunovomacbook/code/python-learning/reports-automation/data/reports/reportei_daily_2026-07-27.html
 Python(61021) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+Python(61023) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+Python(61024) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+Python(61025) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+Python(61026) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+2026-07-27 14:00:53 [INFO] [reportei-daily] Concluido.
+2026-07-27 14:00:53 [INFO] [reportei-monthly] Iniciando relatorio mensal para 2026-07-27
+2026-07-27 14:01:08 [INFO] [reportei-monthly] HTML gerado: /Users/seunovomacbook/code/python-learning/reports-automation/data/reports/reportei_monthly_2026-07-27.html
+Python(61053) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
